@@ -95,3 +95,4 @@ C:\Users\user\source\repos\GPIMSWeb\obj\Debug\net9.0\refint\GPIMSWeb.dll
 C:\Users\user\source\repos\GPIMSWeb\obj\Debug\net9.0\GPIMSWeb.pdb
 C:\Users\user\source\repos\GPIMSWeb\obj\Debug\net9.0\GPIMSWeb.genruntimeconfig.cache
 C:\Users\user\source\repos\GPIMSWeb\obj\Debug\net9.0\ref\GPIMSWeb.dll
+C:\Users\user\source\repos\GPIMSWeb\obj\Debug\net9.0\GPIMSWeb.sourcelink.json

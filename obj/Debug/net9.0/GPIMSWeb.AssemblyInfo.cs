@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("GPIMSWeb")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7be9457b63622c0d1b8188e5115144fd334e3251")]
 [assembly: System.Reflection.AssemblyProductAttribute("GPIMSWeb")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GPIMSWeb")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

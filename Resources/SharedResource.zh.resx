@@ -78,4 +78,34 @@
   <data name="Error" xml:space="preserve">
     <value>错误</value>
   </data>
+  <data name="EquipmentUpdate" xml:space="preserve">
+  <value>设备更新</value>
+  </data>
+  <data name="Update" xml:space="preserve">
+    <value>更新</value>
+  </data>
+  <data name="Version" xml:space="preserve">
+    <value>版本</value>
+  </data>
+  <data name="LastUpdate" xml:space="preserve">
+    <value>最后更新</value>
+  </data>
+  <data name="Running" xml:space="preserve">
+    <value>运行中</value>
+  </data>
+  <data name="Updating" xml:space="preserve">
+    <value>更新中</value>
+  </data>
+  <data name="Pause" xml:space="preserve">
+    <value>暂停</value>
+  </data>
+  <data name="Rest" xml:space="preserve">
+    <value>休息</value>
+  </data>
+  <data name="Charge" xml:space="preserve">
+    <value>充电</value>
+  </data>
+  <data name="Discharge" xml:space="preserve">
+    <value>放电</value>
+  </data>
 </root>

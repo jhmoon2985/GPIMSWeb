@@ -78,4 +78,34 @@
   <data name="Error" xml:space="preserve">
     <value>오류</value>
   </data>
+  <data name="EquipmentUpdate" xml:space="preserve">
+  <value>장비 업데이트</value>
+  </data>
+  <data name="Update" xml:space="preserve">
+    <value>업데이트</value>
+  </data>
+  <data name="Version" xml:space="preserve">
+    <value>버전</value>
+  </data>
+  <data name="LastUpdate" xml:space="preserve">
+    <value>마지막 업데이트</value>
+  </data>
+  <data name="Running" xml:space="preserve">
+    <value>실행중</value>
+  </data>
+  <data name="Updating" xml:space="preserve">
+    <value>업데이트중</value>
+  </data>
+  <data name="Pause" xml:space="preserve">
+    <value>일시정지</value>
+  </data>
+  <data name="Rest" xml:space="preserve">
+    <value>휴지</value>
+  </data>
+  <data name="Charge" xml:space="preserve">
+    <value>충전</value>
+  </data>
+  <data name="Discharge" xml:space="preserve">
+    <value>방전</value>
+  </data>
 </root>

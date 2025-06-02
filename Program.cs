@@ -1,3 +1,5 @@
+// Program.cs 수정 - 기존 코드를 이것으로 교체
+
 using GPIMSWeb.Data;
 using GPIMSWeb.Services;
 using GPIMSWeb.Hubs;
@@ -9,7 +11,9 @@ using System.Globalization;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddViewLocalization()
+    .AddDataAnnotationsLocalization();
 
 // Entity Framework
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -32,7 +36,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEquipmentService, EquipmentService>();
 builder.Services.AddSingleton<IRealtimeDataService, RealtimeDataService>();
 
-// Localization
+// Localization - 수정된 부분
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
@@ -45,6 +49,11 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.DefaultRequestCulture = new RequestCulture("en");
     options.SupportedCultures = supportedCultures;
     options.SupportedUICultures = supportedCultures;
+    
+    // Cookie 우선순위를 높게 설정
+    options.RequestCultureProviders.Clear();
+    options.RequestCultureProviders.Add(new CookieRequestCultureProvider());
+    options.RequestCultureProviders.Add(new AcceptLanguageHeaderRequestCultureProvider());
 });
 
 var app = builder.Build();
@@ -61,6 +70,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+// 중요: 순서가 중요합니다
 app.UseRequestLocalization();
 app.UseAuthentication();
 app.UseAuthorization();

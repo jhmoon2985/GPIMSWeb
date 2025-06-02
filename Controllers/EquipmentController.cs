@@ -58,6 +58,13 @@ namespace GPIMSWeb.Controllers
             return Json(channels);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Update()
+        {
+            var equipment = await _equipmentService.GetAllEquipmentAsync();
+            return View(equipment);
+        }
+
         [HttpPost]
         public async Task<IActionResult> UpdateProgram(int id)
         {

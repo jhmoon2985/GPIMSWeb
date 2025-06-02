@@ -1,0 +1,370 @@
+@model Equipment
+@{
+    ViewData["Title"] = $"Equipment {Model.Name} Detail";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-server"></i> @Model.Name - Real-time Monitoring</h2>
+    <div class="btn-group" role="group">
+        <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+        <button type="button" class="btn btn-outline-primary" onclick="refreshData()">
+            <i class="fas fa-sync-alt"></i> Refresh
+        </button>
+    </div>
+</div>
+
+<!-- Equipment Status -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-circle @(Model.IsOnline ? "text-success" : "text-danger") me-2"></i>
+                            <span class="fw-bold">@(Model.IsOnline ? "Online" : "Offline")</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted">Status:</small><br>
+                        <span class="badge bg-@(Model.Status == EquipmentStatus.Idle ? "secondary" : Model.Status == EquipmentStatus.Running ? "primary" : "danger")">
+                            @Model.Status
+                        </span>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted">Version:</small><br>
+                        <span>@Model.Version</span>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted">Last Update:</small><br>
+                        <span>@Model.LastUpdateTime.ToString("yyyy-MM-dd HH:mm:ss")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabs -->
+<ul class="nav nav-tabs" id="equipmentTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="channels-tab" data-bs-toggle="tab" data-bs-target="#channels" type="button" role="tab">
+            <i class="fas fa-list"></i> Channels
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="canlin-tab" data-bs-toggle="tab" data-bs-target="#canlin" type="button" role="tab">
+            <i class="fas fa-network-wired"></i> CAN/LIN
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="aux-tab" data-bs-toggle="tab" data-bs-target="#aux" type="button" role="tab">
+            <i class="fas fa-thermometer-half"></i> AUX Sensors
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="alarms-tab" data-bs-toggle="tab" data-bs-target="#alarms" type="button" role="tab">
+            <i class="fas fa-exclamation-triangle"></i> Alarms
+            @if (Model.Alarms.Any())
+            {
+                <span class="badge bg-danger ms-1">@Model.Alarms.Count</span>
+            }
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="equipmentTabsContent">
+    <!-- Channels Tab -->
+    <div class="tab-pane fade show active" id="channels" role="tabpanel">
+        <div class="card mt-3">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped" id="channelsTable">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Ch#</th>
+                                <th>Status</th>
+                                <th>Mode</th>
+                                <th>Voltage (V)</th>
+                                <th>Current (A)</th>
+                                <th>Capacity (Ah)</th>
+                                <th>Power (W)</th>
+                                <th>Energy (Wh)</th>
+                                <th>Schedule</th>
+                            </tr>
+                        </thead>
+                        <tbody id="channelsTableBody">
+                            @foreach (var channel in Model.Channels)
+                            {
+                                <tr data-channel="@channel.ChannelNumber">
+                                    <td>@channel.ChannelNumber.ToString("D2")</td>
+                                    <td>
+                                        <span class="badge bg-@(channel.Status == ChannelStatus.Active ? "success" : channel.Status == ChannelStatus.Error ? "danger" : "secondary")">
+                                            @channel.Status
+                                        </span>
+                                    </td>
+                                    <td>@channel.Mode</td>
+                                    <td class="voltage">@channel.Voltage.ToString("F2")</td>
+                                    <td class="current">@channel.Current.ToString("F2")</td>
+                                    <td class="capacity">@channel.Capacity.ToString("F1")</td>
+                                    <td class="power">@channel.Power.ToString("F2")</td>
+                                    <td class="energy">@channel.Energy.ToString("F1")</td>
+                                    <td>@(string.IsNullOrEmpty(channel.ScheduleName) ? "-" : channel.ScheduleName)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Real-time Chart -->
+                <div class="mt-4">
+                    <h5>Real-time Data Chart</h5>
+                    <div id="realtimeChart" style="height: 300px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px;">
+                        <div class="d-flex align-items-center justify-content-center h-100">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-chart-line fa-3x mb-3"></i>
+                                <div>Real-time Channel Data Visualization</div>
+                                <small>Voltage, Current, Power trends will be displayed here</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CAN/LIN Tab -->
+    <div class="tab-pane fade" id="canlin" role="tabpanel">
+        <div class="card mt-3">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Name</th>
+                                <th>Min Value</th>
+                                <th>Max Value</th>
+                                <th>Current Value</th>
+                                <th>Last Update</th>
+                            </tr>
+                        </thead>
+                        <tbody id="canlinTableBody">
+                            @foreach (var canlin in Model.CanLinData)
+                            {
+                                <tr data-name="@canlin.Name">
+                                    <td>@canlin.Name</td>
+                                    <td>@canlin.MinValue.ToString("F2")</td>
+                                    <td>@canlin.MaxValue.ToString("F2")</td>
+                                    <td class="current-value">@canlin.CurrentValue.ToString("F2")</td>
+                                    <td>@canlin.LastUpdateTime.ToString("HH:mm:ss")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUX Sensors Tab -->
+    <div class="tab-pane fade" id="aux" role="tabpanel">
+        <div class="card mt-3">
+            <div class="card-body">
+                <div class="row">
+                    @foreach (var aux in Model.AuxData)
+                    {
+                        <div class="col-lg-4 col-md-6 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-@(aux.Type == AuxDataType.Temperature ? "thermometer-half" : aux.Type == AuxDataType.Voltage ? "bolt" : "microchip") fa-2x text-primary mb-2"></i>
+                                    <h6 class="card-title">@aux.Name</h6>
+                                    <h4 class="text-primary" data-aux="@aux.SensorId">
+                                        @aux.Value.ToString("F1")
+                                        @(aux.Type == AuxDataType.Temperature ? "°C" : aux.Type == AuxDataType.Voltage ? "V" : "Ω")
+                                    </h4>
+                                    <small class="text-muted">@aux.LastUpdateTime.ToString("HH:mm:ss")</small>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alarms Tab -->
+    <div class="tab-pane fade" id="alarms" role="tabpanel">
+        <div class="card mt-3">
+            <div class="card-body">
+                <div id="alarmsContainer">
+                    @foreach (var alarm in Model.Alarms)
+                    {
+                        <div class="alert alert-@(alarm.Level == AlarmLevel.Critical ? "danger" : alarm.Level == AlarmLevel.Error ? "warning" : "info") d-flex justify-content-between align-items-center" data-alarm="@alarm.Id">
+                            <div>
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>@alarm.Level:</strong> @alarm.Message
+                                <br><small class="text-muted">@alarm.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")</small>
+                            </div>
+                            <button class="btn btn-sm btn-outline-danger" onclick="clearAlarm(@alarm.Id)">
+                                <i class="fas fa-times"></i> Clear
+                            </button>
+                        </div>
+                    }
+                </div>
+                @if (!Model.Alarms.Any())
+                {
+                    <div class="text-center py-4">
+                        <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                        <h5 class="text-success">No Active Alarms</h5>
+                        <p class="text-muted">All systems are operating normally.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const equipmentId = @Model.Id;
+        let connection;
+
+        // SignalR 연결 설정
+        function setupSignalR() {
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl("/realtimeDataHub")
+                .build();
+
+            connection.start().then(function () {
+                console.log("SignalR Connected");
+                connection.invoke("JoinEquipmentGroup", equipmentId.toString());
+            }).catch(function (err) {
+                console.error(err.toString());
+            });
+
+            // 채널 데이터 업데이트
+            connection.on("UpdateChannelData", function (channelNumber, channelData) {
+                updateChannelRow(channelNumber, channelData);
+            });
+
+            // CAN/LIN 데이터 업데이트
+            connection.on("UpdateCanLinData", function (name, canLinData) {
+                updateCanLinRow(name, canLinData);
+            });
+
+            // AUX 데이터 업데이트
+            connection.on("UpdateAuxData", function (sensorId, auxData) {
+                updateAuxData(sensorId, auxData);
+            });
+
+            // 새로운 알람
+            connection.on("NewAlarm", function (alarm) {
+                addNewAlarm(alarm);
+            });
+        }
+
+        function updateChannelRow(channelNumber, data) {
+            const row = $(`tr[data-channel="${channelNumber}"]`);
+            if (row.length) {
+                row.find('.voltage').text(data.voltage.toFixed(2));
+                row.find('.current').text(data.current.toFixed(2));
+                row.find('.capacity').text(data.capacity.toFixed(1));
+                row.find('.power').text(data.power.toFixed(2));
+                row.find('.energy').text(data.energy.toFixed(1));
+                
+                // 상태 배지 업데이트
+                const statusBadge = row.find('.badge');
+                statusBadge.removeClass('bg-success bg-danger bg-secondary');
+                if (data.status === 1) { // Active
+                    statusBadge.addClass('bg-success').text('Active');
+                } else if (data.status === 2) { // Error
+                    statusBadge.addClass('bg-danger').text('Error');
+                } else {
+                    statusBadge.addClass('bg-secondary').text('Idle');
+                }
+            }
+        }
+
+        function updateCanLinRow(name, data) {
+            const row = $(`#canlinTableBody tr[data-name="${name}"]`);
+            if (row.length) {
+                row.find('.current-value').text(data.currentValue.toFixed(2));
+            }
+        }
+
+        function updateAuxData(sensorId, data) {
+            const element = $(`[data-aux="${sensorId}"]`);
+            if (element.length) {
+                const unit = data.type === 1 ? '°C' : data.type === 0 ? 'V' : 'Ω';
+                element.text(data.value.toFixed(1) + unit);
+            }
+        }
+
+        function addNewAlarm(alarm) {
+            if (alarm.equipmentId === equipmentId) {
+                const alertClass = alarm.level === 3 ? 'danger' : alarm.level === 2 ? 'warning' : 'info';
+                const alarmHtml = `
+                    <div class="alert alert-${alertClass} d-flex justify-content-between align-items-center" data-alarm="${alarm.id}">
+                        <div>
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>${alarm.level === 3 ? 'Critical' : alarm.level === 2 ? 'Error' : alarm.level === 1 ? 'Warning' : 'Info'}:</strong> ${alarm.message}
+                            <br><small class="text-muted">${new Date(alarm.createdAt).toLocaleString()}</small>
+                        </div>
+                        <button class="btn btn-sm btn-outline-danger" onclick="clearAlarm(${alarm.id})">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                    </div>
+                `;
+                $('#alarmsContainer').prepend(alarmHtml);
+                
+                // 알람 탭에 배지 업데이트
+                updateAlarmBadge();
+            }
+        }
+
+        function clearAlarm(alarmId) {
+            $.post('@Url.Action("ClearAlarm", "Equipment")', { alarmId: alarmId })
+                .done(function(response) {
+                    if (response.success) {
+                        $(`[data-alarm="${alarmId}"]`).fadeOut(300, function() {
+                            $(this).remove();
+                            updateAlarmBadge();
+                        });
+                    } else {
+                        alert('Failed to clear alarm');
+                    }
+                })
+                .fail(function() {
+                    alert('Error clearing alarm');
+                });
+        }
+
+        function updateAlarmBadge() {
+            const alarmCount = $('#alarmsContainer .alert').length;
+            const badge = $('#alarms-tab .badge');
+            if (alarmCount > 0) {
+                badge.text(alarmCount).show();
+            } else {
+                badge.hide();
+            }
+        }
+
+        function refreshData() {
+            location.reload();
+        }
+
+        // 페이지 로드 시 SignalR 연결
+        $(document).ready(function() {
+            setupSignalR();
+        });
+
+        // 페이지 떠날 때 그룹에서 나가기
+        $(window).on('beforeunload', function() {
+            if (connection) {
+                connection.invoke("LeaveEquipmentGroup", equipmentId.toString());
+            }
+        });
+    </script>
+}

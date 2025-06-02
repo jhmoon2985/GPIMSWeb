@@ -1,0 +1,170 @@
+@model SettingsViewModel
+@{
+    ViewData["Title"] = "System Settings";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-cogs"></i> System Settings</h2>
+    <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+
+<div class="row">
+    <!-- Equipment Configuration -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-server"></i> Equipment Configuration</h5>
+            </div>
+            <div class="card-body">
+                <form id="equipmentForm">
+                    <div class="mb-3">
+                        <label class="form-label">Number of Equipment</label>
+                        <input type="number" id="equipmentCount" class="form-control" 
+                               value="@Model.EquipmentCount" min="1" max="32" />
+                        <div class="form-text">Maximum 32 equipment units</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Channels per Equipment</label>
+                        <input type="number" id="channelsPerEquipment" class="form-control" 
+                               value="@Model.ChannelsPerEquipment" min="1" max="64" />
+                        <div class="form-text">Maximum 64 channels per equipment</div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Equipment Settings
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Language Settings -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-globe"></i> Language Settings</h5>
+            </div>
+            <div class="card-body">
+                <form id="languageForm">
+                    <div class="mb-3">
+                        <label class="form-label">Default Language</label>
+                        <select id="defaultLanguage" class="form-select">
+                            <option value="en" selected="@(Model.DefaultLanguage == "en")">English</option>
+                            <option value="ko" selected="@(Model.DefaultLanguage == "ko")">한국어</option>
+                            <option value="zh" selected="@(Model.DefaultLanguage == "zh")">中文</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Date Format</label>
+                        <select id="dateFormat" class="form-select">
+                            <option value="yyyy-MM-dd HH:mm:ss" selected="@(Model.DateFormat == "yyyy-MM-dd HH:mm:ss")">YYYY-MM-DD HH:mm:ss</option>
+                            <option value="MM/dd/yyyy HH:mm:ss" selected="@(Model.DateFormat == "MM/dd/yyyy HH:mm:ss")">MM/DD/YYYY HH:mm:ss</option>
+                            <option value="dd/MM/yyyy HH:mm:ss" selected="@(Model.DateFormat == "dd/MM/yyyy HH:mm:ss")">DD/MM/YYYY HH:mm:ss</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Language Settings
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Information -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> System Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong>Application Version:</strong><br>
+                        <span class="text-muted">1.0.0</span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Database:</strong><br>
+                        <span class="text-muted">SQL Server LocalDB</span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Server Time:</strong><br>
+                        <span class="text-muted">@DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")</span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Environment:</strong><br>
+                        <span class="text-muted">@Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $('#equipmentForm').submit(function(e) {
+            e.preventDefault();
+            
+            const equipmentCount = $('#equipmentCount').val();
+            const channelsPerEquipment = $('#channelsPerEquipment').val();
+            
+            $.post('@Url.Action("SaveEquipmentSettings")', {
+                equipmentCount: equipmentCount,
+                channelsPerEquipment: channelsPerEquipment
+            })
+            .done(function(response) {
+                if (response.success) {
+                    showNotification('Equipment settings saved successfully!', 'success');
+                } else {
+                    showNotification('Failed to save equipment settings!', 'danger');
+                }
+            })
+            .fail(function() {
+                showNotification('Error saving equipment settings!', 'danger');
+            });
+        });
+
+        $('#languageForm').submit(function(e) {
+            e.preventDefault();
+            
+            const defaultLanguage = $('#defaultLanguage').val();
+            const dateFormat = $('#dateFormat').val();
+            
+            $.post('@Url.Action("SaveLanguageSettings")', {
+                defaultLanguage: defaultLanguage,
+                dateFormat: dateFormat
+            })
+            .done(function(response) {
+                if (response.success) {
+                    showNotification('Language settings saved successfully!', 'success');
+                } else {
+                    showNotification('Failed to save language settings!', 'danger');
+                }
+            })
+            .fail(function() {
+                showNotification('Error saving language settings!', 'danger');
+            });
+        });
+
+        function showNotification(message, type) {
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            $('.container-fluid main').prepend(alertHtml);
+            
+            setTimeout(() => {
+                $('.alert').first().fadeOut();
+            }, 3000);
+        }
+    </script>
+}

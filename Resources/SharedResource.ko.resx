@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Dashboard" xml:space="preserve">
+    <value>대시보드</value>
+  </data>
+  <data name="UserManagement" xml:space="preserve">
+    <value>사용자 관리</value>
+  </data>
+  <data name="UserHistory" xml:space="preserve">
+    <value>사용자 이력</value>
+  </data>
+  <data name="EquipmentUpdate" xml:space="preserve">
+    <value>장비 업데이트</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>설정</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>언어</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>로그아웃</value>
+  </data>
+  <data name="Login" xml:space="preserve">
+    <value>로그인</value>
+  </data>
+  <data name="Username" xml:space="preserve">
+    <value>사용자명</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>비밀번호</value>
+  </data>
+  <data name="Equipment" xml:space="preserve">
+    <value>장비</value>
+  </data>
+  <data name="Online" xml:space="preserve">
+    <value>온라인</value>
+  </data>
+  <data name="Offline" xml:space="preserve">
+    <value>오프라인</value>
+  </data>
+  <data name="Channels" xml:space="preserve">
+    <value>채널</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>상태</value>
+  </data>
+  <data name="Mode" xml:space="preserve">
+    <value>모드</value>
+  </data>
+  <data name="Voltage" xml:space="preserve">
+    <value>전압</value>
+  </data>
+  <data name="Current" xml:space="preserve">
+    <value>전류</value>
+  </data>
+  <data name="Capacity" xml:space="preserve">
+    <value>용량</value>
+  </data>
+  <data name="Power" xml:space="preserve">
+    <value>전력</value>
+  </data>
+  <data name="Energy" xml:space="preserve">
+    <value>전력량</value>
+  </data>
+  <data name="Schedule" xml:space="preserve">
+    <value>스케줄</value>
+  </data>
+  <data name="Alarms" xml:space="preserve">
+    <value>알람</value>
+  </data>
+  <data name="Active" xml:space="preserve">
+    <value>활성</value>
+  </data>
+  <data name="Idle" xml:space="preserve">
+    <value>대기</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>오류</value>
+  </data>
+</root>

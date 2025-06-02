@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Dashboard" xml:space="preserve">
+    <value>仪表板</value>
+  </data>
+  <data name="UserManagement" xml:space="preserve">
+    <value>用户管理</value>
+  </data>
+  <data name="UserHistory" xml:space="preserve">
+    <value>用户历史</value>
+  </data>
+  <data name="EquipmentUpdate" xml:space="preserve">
+    <value>设备更新</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>设置</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>语言</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>登出</value>
+  </data>
+  <data name="Login" xml:space="preserve">
+    <value>登录</value>
+  </data>
+  <data name="Username" xml:space="preserve">
+    <value>用户名</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>密码</value>
+  </data>
+  <data name="Equipment" xml:space="preserve">
+    <value>设备</value>
+  </data>
+  <data name="Online" xml:space="preserve">
+    <value>在线</value>
+  </data>
+  <data name="Offline" xml:space="preserve">
+    <value>离线</value>
+  </data>
+  <data name="Channels" xml:space="preserve">
+    <value>通道</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>状态</value>
+  </data>
+  <data name="Mode" xml:space="preserve">
+    <value>模式</value>
+  </data>
+  <data name="Voltage" xml:space="preserve">
+    <value>电压</value>
+  </data>
+  <data name="Current" xml:space="preserve">
+    <value>电流</value>
+  </data>
+  <data name="Capacity" xml:space="preserve">
+    <value>容量</value>
+  </data>
+  <data name="Power" xml:space="preserve">
+    <value>功率</value>
+  </data>
+  <data name="Energy" xml:space="preserve">
+    <value>能量</value>
+  </data>
+  <data name="Schedule" xml:space="preserve">
+    <value>计划</value>
+  </data>
+  <data name="Alarms" xml:space="preserve">
+    <value>报警</value>
+  </data>
+  <data name="Active" xml:space="preserve">
+    <value>活动</value>
+  </data>
+  <data name="Idle" xml:space="preserve">
+    <value>空闲</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>错误</value>
+  </data>
+</root>

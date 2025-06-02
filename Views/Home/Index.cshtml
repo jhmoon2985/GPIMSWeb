@@ -1,8 +1,120 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using Microsoft.Extensions.Localization
+@using GPIMSWeb.Resources
+@inject IStringLocalizer<SharedResource> Localizer
+@model List<Equipment>
+@{
+    ViewData["Title"] = Localizer["Dashboard"];
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-tachometer-alt"></i> @Localizer["Equipment"] @Localizer["Status"] Overview</h2>
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-outline-primary" onclick="refreshData()">
+            <i class="fas fa-sync-alt"></i> Refresh
+        </button>
+    </div>
 </div>
+
+<div class="row" id="equipmentGrid">
+    @foreach (var equipment in Model)
+    {
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            <div class="card equipment-card @(equipment.IsOnline ? "border-success" : "border-danger")" 
+                 onclick="viewEquipment(@equipment.Id)">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-server fa-2x @(equipment.IsOnline ? "text-success" : "text-danger")"></i>
+                    </div>
+                    <h5 class="card-title">@equipment.Name</h5>
+                    <span class="badge @(equipment.IsOnline ? "bg-success" : "bg-danger") mb-2">
+                        @Localizer[equipment.IsOnline ? "Online" : "Offline"]
+                    </span>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            @equipment.Channels.Count(c => c.Status == ChannelStatus.Active) @Localizer["Channels"] @Localizer["Active"]<br>
+                            Last Update: @equipment.LastUpdateTime.ToString("yyyy-MM-dd HH:mm:ss")
+                        </small>
+                    </p>
+                    @if (equipment.Alarms.Any())
+                    {
+                        <div class="alert alert-warning alert-sm mb-0">
+                            <i class="fas fa-exclamation-triangle"></i> @equipment.Alarms.Count @Localizer["Active"] @Localizer["Alarms"]
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5">
+        <i class="fas fa-server fa-3x text-muted mb-3"></i>
+        <h4 class="text-muted">No Equipment Found</h4>
+        <p class="text-muted">No equipment has been configured yet.</p>
+    </div>
+}
+
+<style>
+    .equipment-card {
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .equipment-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .alert-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        function viewEquipment(id) {
+            window.location.href = '@Url.Action("Detail", "Equipment")/' + id;
+        }
+
+        function refreshData() {
+            location.reload();
+        }
+
+        // SignalR 연결
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/realtimeDataHub")
+            .build();
+
+        connection.start().then(function () {
+            console.log("SignalR Connected");
+        }).catch(function (err) {
+            console.error(err.toString());
+        });
+
+        // 새로운 알람 수신
+        connection.on("NewAlarm", function (alarm) {
+            // 알람 알림 표시
+            showAlarmNotification(alarm);
+        });
+
+        function showAlarmNotification(alarm) {
+            const alertHtml = `
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle"></i> 
+                    <strong>Equipment #${alarm.equipmentId}:</strong> ${alarm.message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            // 페이지 상단에 알림 추가
+            const container = $('.container-fluid main');
+            container.prepend(alertHtml);
+            
+            // 5초 후 자동 제거
+            setTimeout(() => {
+                $('.alert').first().fadeOut();
+            }, 5000);
+        }
+    </script>
+}

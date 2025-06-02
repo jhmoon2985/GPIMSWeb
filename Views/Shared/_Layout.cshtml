@@ -1,50 +1,110 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.Extensions.Localization
+@using GPIMSWeb.Resources
+@inject IStringLocalizer<SharedResource> Localizer
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - GPIMSWeb</title>
-    <script type="importmap"></script>
+    <title>@ViewData["Title"] - GPIMS Web</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/GPIMSWeb.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">GPIMSWeb</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <a class="navbar-brand" href="/">
+                    <i class="fas fa-cog"></i> GPIMS Web
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link" asp-controller="Home" asp-action="Index">
+                                <i class="fas fa-tachometer-alt"></i> @Localizer["Dashboard"]
+                            </a>
                         </li>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="User" asp-action="Index">
+                                    <i class="fas fa-users"></i> @Localizer["UserManagement"]
+                                </a>
+                            </li>
+                        }
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link" asp-controller="User" asp-action="History">
+                                <i class="fas fa-history"></i> @Localizer["UserHistory"]
+                            </a>
                         </li>
+                        @if (User.IsInRole("Admin") || User.IsInRole("Maintenance"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Equipment" asp-action="Update">
+                                    <i class="fas fa-download"></i> @Localizer["EquipmentUpdate"]
+                                </a>
+                            </li>
+                        }
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Settings" asp-action="Index">
+                                    <i class="fas fa-cogs"></i> @Localizer["Settings"]
+                                </a>
+                            </li>
+                        }
                     </ul>
+                    <div class="navbar-nav">
+                        <div class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-globe"></i> @Localizer["Language"]
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" onclick="setLanguage('en')">English</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="setLanguage('ko')">한국어</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="setLanguage('zh')">中文</a></li>
+                            </ul>
+                        </div>
+                        <span class="navbar-text me-3">
+                            <i class="fas fa-user"></i> @User.FindFirst("FullName")?.Value
+                        </span>
+                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-outline-light btn-sm">
+                                <i class="fas fa-sign-out-alt"></i> @Localizer["Logout"]
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
+    <div class="container-fluid">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - GPIMSWeb - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/lib/signalr/dist/browser/signalr.min.js"></script>
+    
+    <script>
+        function setLanguage(culture) {
+            $.post('@Url.Action("SetLanguage", "Account")', {
+                culture: culture,
+                returnUrl: window.location.pathname
+            }, function() {
+                location.reload();
+            });
+        }
+    </script>
+    
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -50,11 +50,10 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.SupportedCultures = supportedCultures;
     options.SupportedUICultures = supportedCultures;
     
-    // RequestCultureProvider 순서 설정
+    // Provider 순서를 바꿔서 기본값을 우선으로
     options.RequestCultureProviders.Clear();
-    options.RequestCultureProviders.Add(new QueryStringRequestCultureProvider());
     options.RequestCultureProviders.Add(new CookieRequestCultureProvider());
-    options.RequestCultureProviders.Add(new AcceptLanguageHeaderRequestCultureProvider());
+    options.RequestCultureProviders.Add(new QueryStringRequestCultureProvider());
 });
 
 var app = builder.Build();
@@ -70,6 +69,17 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+// 강제 문화권 설정
+app.Use(async (context, next) =>
+{
+    var culture = new CultureInfo("en");
+    CultureInfo.CurrentCulture = culture;
+    CultureInfo.CurrentUICulture = culture;
+    Thread.CurrentThread.CurrentCulture = culture;
+    Thread.CurrentThread.CurrentUICulture = culture;
+    await next();
+});
 
 // 중요: 순서가 중요합니다
 app.UseRequestLocalization();

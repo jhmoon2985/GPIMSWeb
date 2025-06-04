@@ -1,13 +1,72 @@
 ﻿@using Microsoft.Extensions.Localization
 @using GPIMSWeb.Resources
+@using System.Reflection
+@using System.Resources
+@using System.Globalization
 @inject IStringLocalizer<SharedResource> Localizer
 @model List<Equipment>
 @{
-    ViewData["Title"] = Localizer["Dashboard"];
+    ViewData["Title"] = "대시보드"; // 하드코딩으로 임시 해결
+    
+    // 직접 ResourceManager 사용하는 함수
+    string GetLocalizedString(string key) 
+    {
+        try 
+        {
+            var resourceManager = new ResourceManager("GPIMSWeb.Resources.SharedResource", Assembly.GetExecutingAssembly());
+            string dd = resourceManager.GetString(key, CultureInfo.CurrentUICulture) ?? key;
+            return resourceManager.GetString(key, CultureInfo.CurrentUICulture) ?? key;
+        }
+        catch 
+        {
+            return key;
+        }
+    }
 }
 
+<!-- 디버깅 정보 추가 -->
+<div style="background: red; color: white; padding: 20px; margin: 10px; font-family: monospace;">
+    <h3>🐛 DETAILED DEBUG</h3>
+    
+    <strong>1. Culture Info:</strong><br>
+    Current Culture: @CultureInfo.CurrentCulture.Name<br>
+    Current UI Culture: @CultureInfo.CurrentUICulture.Name<br><br>
+    
+    <strong>2. Resource Test:</strong><br>
+    Dashboard = "@Localizer["Dashboard"]"<br>
+    Equipment = "@Localizer["Equipment"]"<br>
+    Status = "@Localizer["Status"]"<br><br>
+    
+    <strong>3. Resource Manager Test:</strong><br>
+    @{
+        try 
+        {
+            var resourceManager = new ResourceManager("GPIMSWeb.Resources.SharedResource", Assembly.GetExecutingAssembly());
+            var dashboardDirect = resourceManager.GetString("Dashboard", new CultureInfo("ko"));
+            <text>Direct Dashboard (ko): @dashboardDirect<br></text>
+            
+            var equipmentDirect = resourceManager.GetString("Equipment", new CultureInfo("ko"));
+            <text>Direct Equipment (ko): @equipmentDirect<br></text>
+        }
+        catch (Exception ex)
+        {
+            <text>Resource Manager Error: @ex.Message<br></text>
+        }
+    }
+    
+    <strong>4. Assembly Resources:</strong><br>
+    @{
+        var assembly = Assembly.GetExecutingAssembly();
+        var resourceNames = assembly.GetManifestResourceNames();
+        foreach(var name in resourceNames.Where(n => n.Contains("SharedResource")))
+        {
+            <text>Found: @name<br></text>
+        }
+    }
+</div>
+
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="fas fa-tachometer-alt"></i> @Localizer["Equipment"] @Localizer["Status"] Overview</h2>
+    <h2><i class="fas fa-tachometer-alt"></i> @GetLocalizedString("Equipment") @GetLocalizedString("Status") Overview</h2>
     <div class="btn-group" role="group">
         <button type="button" class="btn btn-outline-primary" onclick="refreshData()">
             <i class="fas fa-sync-alt"></i> Refresh
@@ -27,18 +86,18 @@
                     </div>
                     <h5 class="card-title">@equipment.Name</h5>
                     <span class="badge @(equipment.IsOnline ? "bg-success" : "bg-danger") mb-2">
-                        @Localizer[equipment.IsOnline ? "Online" : "Offline"]
+                        @GetLocalizedString(equipment.IsOnline ? "Online" : "Offline")
                     </span>
                     <p class="card-text">
                         <small class="text-muted">
-                            @equipment.Channels.Count(c => c.Status == ChannelStatus.Active) @Localizer["Channels"] @Localizer["Active"]<br>
+                            @equipment.Channels.Count(c => c.Status == ChannelStatus.Active) @GetLocalizedString("Channels") @GetLocalizedString("Active")<br>
                             Last Update: @equipment.LastUpdateTime.ToString("yyyy-MM-dd HH:mm:ss")
                         </small>
                     </p>
                     @if (equipment.Alarms.Any())
                     {
                         <div class="alert alert-warning alert-sm mb-0">
-                            <i class="fas fa-exclamation-triangle"></i> @equipment.Alarms.Count @Localizer["Active"] @Localizer["Alarms"]
+                            <i class="fas fa-exclamation-triangle"></i> @equipment.Alarms.Count @GetLocalizedString("Active") @GetLocalizedString("Alarms")
                         </div>
                     }
                 </div>

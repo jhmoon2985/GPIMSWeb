@@ -95,37 +95,14 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/lib/signalr/dist/browser/signalr.min.js"></script>
     
+    <!-- CSRF 토큰을 숨겨진 필드로 추가 -->
+    @Html.AntiForgeryToken()
+    
     <script>
         function setLanguage(culture) {
-            // 폼을 동적으로 생성하여 POST 요청
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '@Url.Action("SetLanguage", "Account")';
-            form.style.display = 'none';
-            
-            const cultureInput = document.createElement('input');
-            cultureInput.type = 'hidden';
-            cultureInput.name = 'culture';
-            cultureInput.value = culture;
-            
-            const returnUrlInput = document.createElement('input');
-            returnUrlInput.type = 'hidden';
-            returnUrlInput.name = 'returnUrl';
-            returnUrlInput.value = window.location.pathname + window.location.search;
-            
-            // CSRF 토큰 추가
-            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
-            const csrfInput = document.createElement('input');
-            csrfInput.type = 'hidden';
-            csrfInput.name = '__RequestVerificationToken';
-            csrfInput.value = token;
-            
-            form.appendChild(cultureInput);
-            form.appendChild(returnUrlInput);
-            form.appendChild(csrfInput);
-            
-            document.body.appendChild(form);
-            form.submit();
+            // 단순히 쿠키를 설정하고 페이지를 새로고침
+            document.cookie = `AspNetCore.Culture=c=${culture}|uic=${culture}; path=/; expires=${new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString()}`;
+            window.location.reload();
         }
     </script>
     

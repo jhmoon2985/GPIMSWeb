@@ -39,7 +39,7 @@ namespace GPIMSWeb.Controllers
                 return View(model);
             }
 
-            // 언어 설정
+            // 언어 설정 - 쿠키 직접 설정
             if (!string.IsNullOrEmpty(model.Language))
             {
                 Response.Cookies.Append(
@@ -50,7 +50,8 @@ namespace GPIMSWeb.Controllers
                         Expires = DateTimeOffset.UtcNow.AddYears(1),
                         HttpOnly = false,
                         Secure = false,
-                        SameSite = SameSiteMode.Lax
+                        SameSite = SameSiteMode.Lax,
+                        Path = "/"
                     }
                 );
             }
@@ -97,19 +98,20 @@ namespace GPIMSWeb.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult SetLanguage(string culture, string returnUrl)
+        public IActionResult SetLanguage(string culture, string returnUrl = null)
         {
             if (!string.IsNullOrEmpty(culture))
             {
-                // 쿠키 설정
+                // 더 명확한 쿠키 설정
+                var cookieValue = CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture));
                 Response.Cookies.Append(
                     CookieRequestCultureProvider.DefaultCookieName,
-                    CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
+                    cookieValue,
                     new CookieOptions 
                     { 
                         Expires = DateTimeOffset.UtcNow.AddYears(1),
                         HttpOnly = false,
-                        Secure = false,
+                        Secure = Request.IsHttps,
                         SameSite = SameSiteMode.Lax,
                         Path = "/"
                     }

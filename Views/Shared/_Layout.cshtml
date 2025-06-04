@@ -65,15 +65,16 @@
                                 <i class="fas fa-globe"></i> @Localizer["Language"]
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#" onclick="setLanguage('en')">English</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="setLanguage('ko')">한국어</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="setLanguage('zh')">中文</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0)" onclick="setLanguage('en')">English</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0)" onclick="setLanguage('ko')">한국어</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0)" onclick="setLanguage('zh')">中文</a></li>
                             </ul>
                         </div>
                         <span class="navbar-text me-3">
                             <i class="fas fa-user"></i> @User.FindFirst("FullName")?.Value
                         </span>
                         <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
                             <button type="submit" class="btn btn-outline-light btn-sm">
                                 <i class="fas fa-sign-out-alt"></i> @Localizer["Logout"]
                             </button>
@@ -100,6 +101,7 @@
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = '@Url.Action("SetLanguage", "Account")';
+            form.style.display = 'none';
             
             const cultureInput = document.createElement('input');
             cultureInput.type = 'hidden';
@@ -112,17 +114,15 @@
             returnUrlInput.value = window.location.pathname + window.location.search;
             
             // CSRF 토큰 추가
-            const token = document.querySelector('input[name="__RequestVerificationToken"]');
-            if (token) {
-                const csrfInput = document.createElement('input');
-                csrfInput.type = 'hidden';
-                csrfInput.name = '__RequestVerificationToken';
-                csrfInput.value = token.value;
-                form.appendChild(csrfInput);
-            }
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '__RequestVerificationToken';
+            csrfInput.value = token;
             
             form.appendChild(cultureInput);
             form.appendChild(returnUrlInput);
+            form.appendChild(csrfInput);
             
             document.body.appendChild(form);
             form.submit();

@@ -1,5 +1,3 @@
-// Program.cs 수정 - 기존 코드를 이것으로 교체
-
 using GPIMSWeb.Data;
 using GPIMSWeb.Services;
 using GPIMSWeb.Hubs;
@@ -38,6 +36,7 @@ builder.Services.AddSingleton<IRealtimeDataService, RealtimeDataService>();
 
 // Localization - 수정된 부분
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
     var supportedCultures = new[]
@@ -46,12 +45,14 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
         new CultureInfo("ko"),
         new CultureInfo("zh")
     };
+
     options.DefaultRequestCulture = new RequestCulture("en");
     options.SupportedCultures = supportedCultures;
     options.SupportedUICultures = supportedCultures;
     
-    // Cookie 우선순위를 높게 설정
+    // RequestCultureProvider 순서 설정
     options.RequestCultureProviders.Clear();
+    options.RequestCultureProviders.Add(new QueryStringRequestCultureProvider());
     options.RequestCultureProviders.Add(new CookieRequestCultureProvider());
     options.RequestCultureProviders.Add(new AcceptLanguageHeaderRequestCultureProvider());
 });

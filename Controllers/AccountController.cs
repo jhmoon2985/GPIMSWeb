@@ -45,7 +45,13 @@ namespace GPIMSWeb.Controllers
                 Response.Cookies.Append(
                     CookieRequestCultureProvider.DefaultCookieName,
                     CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(model.Language)),
-                    new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) }
+                    new CookieOptions 
+                    { 
+                        Expires = DateTimeOffset.UtcNow.AddYears(1),
+                        HttpOnly = false,
+                        Secure = false,
+                        SameSite = SameSiteMode.Lax
+                    }
                 );
             }
 
@@ -90,17 +96,22 @@ namespace GPIMSWeb.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult SetLanguage(string culture, string returnUrl)
         {
             if (!string.IsNullOrEmpty(culture))
             {
+                // 쿠키 설정
                 Response.Cookies.Append(
                     CookieRequestCultureProvider.DefaultCookieName,
                     CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
                     new CookieOptions 
                     { 
                         Expires = DateTimeOffset.UtcNow.AddYears(1),
-                        SameSite = SameSiteMode.Lax
+                        HttpOnly = false,
+                        Secure = false,
+                        SameSite = SameSiteMode.Lax,
+                        Path = "/"
                     }
                 );
             }

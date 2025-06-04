@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.Extensions.Options;
 
 namespace GPIMSWeb.Controllers
 {
@@ -13,11 +15,14 @@ namespace GPIMSWeb.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IUserService _userService;
+        private readonly IOptionsSnapshot<RequestLocalizationOptions> _localizationOptions;
 
-        public SettingsController(ApplicationDbContext context, IUserService userService)
+        public SettingsController(ApplicationDbContext context, IUserService userService,
+            IOptionsSnapshot<RequestLocalizationOptions> localizationOptions)
         {
             _context = context;
             _userService = userService;
+            _localizationOptions = localizationOptions;
         }
 
         [HttpGet]
@@ -104,14 +109,17 @@ namespace GPIMSWeb.Controllers
 
                 var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
                 await _userService.LogUserActionAsync(userId, "Update Settings", 
-                    $"Language: {defaultLanguage}, Format: {dateFormat}",
+                    $"Default Language: {defaultLanguage}, Date Format: {dateFormat}",
                     HttpContext.Connection.RemoteIpAddress?.ToString());
 
-                return Json(new { success = true });
+                return Json(new { 
+                    success = true, 
+                    message = "Language settings saved. Restart the application to apply the new default language." 
+                });
             }
             catch
             {
-                return Json(new { success = false });
+                return Json(new { success = false, message = "Failed to save language settings." });
             }
         }
     }

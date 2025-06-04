@@ -211,20 +211,70 @@ namespace GPIMSWeb.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "Equipment",
+                columns: new[] { "Id", "IsOnline", "LastUpdateTime", "Name", "Status", "Version" },
+                values: new object[,]
+                {
+                    { 1, true, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1242), "GPIMS-001", 0, "v2.1.0" },
+                    { 2, true, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1247), "GPIMS-002", 0, "v2.1.0" },
+                    { 3, false, new DateTime(2025, 6, 4, 22, 12, 49, 747, DateTimeKind.Local).AddTicks(1249), "GPIMS-003", 2, "v2.0.5" },
+                    { 4, true, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1278), "GPIMS-004", 1, "v2.1.0" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "SystemSettings",
                 columns: new[] { "Id", "Description", "Key", "UpdatedAt", "UpdatedBy", "Value" },
                 values: new object[,]
                 {
-                    { 1, "Number of equipment", "EquipmentCount", new DateTime(2025, 6, 2, 17, 38, 24, 269, DateTimeKind.Local).AddTicks(6817), "System", "4" },
-                    { 2, "Channels per equipment", "ChannelsPerEquipment", new DateTime(2025, 6, 2, 17, 38, 24, 269, DateTimeKind.Local).AddTicks(6824), "System", "8" },
-                    { 3, "Default system language", "DefaultLanguage", new DateTime(2025, 6, 2, 17, 38, 24, 269, DateTimeKind.Local).AddTicks(6827), "System", "en" },
-                    { 4, "Date format", "DateFormat", new DateTime(2025, 6, 2, 17, 38, 24, 269, DateTimeKind.Local).AddTicks(6829), "System", "yyyy-MM-dd HH:mm:ss" }
+                    { 1, "Number of equipment", "EquipmentCount", new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1179), "System", "4" },
+                    { 2, "Channels per equipment", "ChannelsPerEquipment", new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1181), "System", "8" },
+                    { 3, "Default system language", "DefaultLanguage", new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1182), "System", "en" },
+                    { 4, "Date format", "DateFormat", new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1184), "System", "yyyy-MM-dd HH:mm:ss" }
                 });
 
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "CreatedAt", "Department", "IsActive", "LastLoginAt", "Level", "Name", "PasswordHash", "Username" },
-                values: new object[] { 1, new DateTime(2025, 6, 2, 17, 38, 24, 269, DateTimeKind.Local).AddTicks(5431), "IT", true, null, 3, "System Administrator", "$2a$11$V1X9YmA8z.yjaU.WFX7N6.U3AoDDvQfcWv88W1oIsrevlUkGBuuaa", "admin" });
+                values: new object[] { 1, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(561), "IT", true, null, 3, "System Administrator", "$2a$11$khohGPLmyoeWR19lbKQw3.9z6XNzsaVUR1J14ck/.4foKCq0NgixW", "admin" });
+
+            migrationBuilder.InsertData(
+                table: "Channels",
+                columns: new[] { "Id", "Capacity", "ChannelNumber", "Current", "Energy", "EquipmentId", "LastUpdateTime", "Mode", "Power", "ScheduleName", "Status", "Voltage" },
+                values: new object[,]
+                {
+                    { 1, 55.0, 1, 1.7, 28.5, 1, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1332), 2, 6.46, "Schedule_1", 1, 3.8000000000000003 },
+                    { 2, 60.0, 2, 1.8999999999999999, 31.5, 1, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1336), 1, 7.4100000000000001, "Schedule_2", 1, 3.9000000000000004 },
+                    { 3, 65.0, 3, 2.1000000000000001, 34.5, 1, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1338), 2, 8.4000000000000004, "Schedule_3", 1, 4.0 },
+                    { 4, 70.0, 4, 2.2999999999999998, 37.5, 1, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1340), 1, 9.4299999999999997, "Schedule_4", 1, 4.1000000000000005 },
+                    { 5, 75.0, 5, 0.0, 0.0, 1, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1342), 2, 0.0, "", 0, 4.2000000000000002 },
+                    { 6, 80.0, 6, 0.0, 0.0, 1, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1360), 1, 0.0, "", 0, 4.3000000000000007 },
+                    { 7, 85.0, 7, 0.0, 0.0, 1, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1361), 2, 0.0, "", 0, 4.4000000000000004 },
+                    { 8, 90.0, 8, 0.0, 0.0, 1, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1390), 1, 0.0, "", 0, 4.5 },
+                    { 9, 55.0, 1, 1.7, 28.5, 2, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1392), 2, 6.46, "Schedule_1", 1, 3.8000000000000003 },
+                    { 10, 60.0, 2, 1.8999999999999999, 31.5, 2, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1400), 1, 7.4100000000000001, "Schedule_2", 1, 3.9000000000000004 },
+                    { 11, 65.0, 3, 2.1000000000000001, 34.5, 2, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1402), 2, 8.4000000000000004, "Schedule_3", 1, 4.0 },
+                    { 12, 70.0, 4, 2.2999999999999998, 37.5, 2, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1404), 1, 9.4299999999999997, "Schedule_4", 1, 4.1000000000000005 },
+                    { 13, 75.0, 5, 0.0, 0.0, 2, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1405), 2, 0.0, "", 0, 4.2000000000000002 },
+                    { 14, 80.0, 6, 0.0, 0.0, 2, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1406), 1, 0.0, "", 0, 4.3000000000000007 },
+                    { 15, 85.0, 7, 0.0, 0.0, 2, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1407), 2, 0.0, "", 0, 4.4000000000000004 },
+                    { 16, 90.0, 8, 0.0, 0.0, 2, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1408), 1, 0.0, "", 0, 4.5 },
+                    { 17, 55.0, 1, 1.7, 28.5, 3, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1410), 2, 6.46, "Schedule_1", 1, 3.8000000000000003 },
+                    { 18, 60.0, 2, 1.8999999999999999, 31.5, 3, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1413), 1, 7.4100000000000001, "Schedule_2", 1, 3.9000000000000004 },
+                    { 19, 65.0, 3, 2.1000000000000001, 34.5, 3, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1414), 2, 8.4000000000000004, "Schedule_3", 1, 4.0 },
+                    { 20, 70.0, 4, 2.2999999999999998, 37.5, 3, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1416), 1, 9.4299999999999997, "Schedule_4", 1, 4.1000000000000005 },
+                    { 21, 75.0, 5, 0.0, 0.0, 3, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1417), 2, 0.0, "", 0, 4.2000000000000002 },
+                    { 22, 80.0, 6, 0.0, 0.0, 3, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1418), 1, 0.0, "", 0, 4.3000000000000007 },
+                    { 23, 85.0, 7, 0.0, 0.0, 3, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1419), 2, 0.0, "", 0, 4.4000000000000004 },
+                    { 24, 90.0, 8, 0.0, 0.0, 3, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1420), 1, 0.0, "", 0, 4.5 },
+                    { 25, 55.0, 1, 1.7, 28.5, 4, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1430), 2, 6.46, "Schedule_1", 1, 3.8000000000000003 },
+                    { 26, 60.0, 2, 1.8999999999999999, 31.5, 4, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1441), 1, 7.4100000000000001, "Schedule_2", 1, 3.9000000000000004 },
+                    { 27, 65.0, 3, 2.1000000000000001, 34.5, 4, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1444), 2, 8.4000000000000004, "Schedule_3", 1, 4.0 },
+                    { 28, 70.0, 4, 2.2999999999999998, 37.5, 4, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1445), 1, 9.4299999999999997, "Schedule_4", 1, 4.1000000000000005 },
+                    { 29, 75.0, 5, 0.0, 0.0, 4, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1446), 2, 0.0, "", 0, 4.2000000000000002 },
+                    { 30, 80.0, 6, 0.0, 0.0, 4, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1447), 1, 0.0, "", 0, 4.3000000000000007 },
+                    { 31, 85.0, 7, 0.0, 0.0, 4, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1448), 2, 0.0, "", 0, 4.4000000000000004 },
+                    { 32, 90.0, 8, 0.0, 0.0, 4, new DateTime(2025, 6, 4, 22, 42, 49, 747, DateTimeKind.Local).AddTicks(1449), 1, 0.0, "", 0, 4.5 }
+                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Alarms_EquipmentId",

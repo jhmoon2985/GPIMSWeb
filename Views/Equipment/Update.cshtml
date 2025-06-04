@@ -1,12 +1,28 @@
+@using System.Reflection
+@using System.Resources
+@using System.Globalization
 @model List<Equipment>
 @{
-    ViewData["Title"] = "Equipment Update";
+    string GetLocalizedString(string key) 
+    {
+        try 
+        {
+            var resourceManager = new ResourceManager("GPIMSWeb.Resources.SharedResource", Assembly.GetExecutingAssembly());
+            return resourceManager.GetString(key, CultureInfo.CurrentUICulture) ?? key;
+        }
+        catch 
+        {
+            return key;
+        }
+    }
+    
+    ViewData["Title"] = GetLocalizedString("EquipmentUpdate");
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="fas fa-download"></i> Equipment Program Update</h2>
+    <h2><i class="fas fa-download"></i> @GetLocalizedString("EquipmentProgramUpdate")</h2>
     <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary">
-        <i class="fas fa-arrow-left"></i> Back to Dashboard
+        <i class="fas fa-arrow-left"></i> @GetLocalizedString("BackToDashboard")
     </a>
 </div>
 
@@ -20,28 +36,28 @@
                         <i class="fas fa-server"></i> @equipment.Name
                     </h5>
                     <span class="badge @(equipment.IsOnline ? "bg-success" : "bg-danger")">
-                        @(equipment.IsOnline ? "Online" : "Offline")
+                        @GetLocalizedString(equipment.IsOnline ? "Online" : "Offline")
                     </span>
                 </div>
                 <div class="card-body">
                     <div class="row mb-3">
                         <div class="col-6">
-                            <small class="text-muted">Current Version:</small><br>
+                            <small class="text-muted">@GetLocalizedString("CurrentVersion"):</small><br>
                             <strong>@equipment.Version</strong>
                         </div>
                         <div class="col-6">
-                            <small class="text-muted">Status:</small><br>
+                            <small class="text-muted">@GetLocalizedString("Status"):</small><br>
                             <span class="badge bg-@(equipment.Status == EquipmentStatus.Idle ? "secondary" : 
                                 equipment.Status == EquipmentStatus.Running ? "primary" : 
                                 equipment.Status == EquipmentStatus.Error ? "danger" : "warning")">
-                                @equipment.Status
+                                @GetLocalizedString(equipment.Status.ToString())
                             </span>
                         </div>
                     </div>
                     
                     <div class="row mb-3">
                         <div class="col-12">
-                            <small class="text-muted">Last Update:</small><br>
+                            <small class="text-muted">@GetLocalizedString("LastUpdate"):</small><br>
                             @equipment.LastUpdateTime.ToString("yyyy-MM-dd HH:mm:ss")
                         </div>
                     </div>
@@ -58,19 +74,19 @@
                         {
                             <button class="btn btn-primary" onclick="updateEquipment(@equipment.Id)" 
                                     id="update-btn-@equipment.Id">
-                                <i class="fas fa-download"></i> Update to v2.2.0
+                                <i class="fas fa-download"></i> @GetLocalizedString("UpdateToVersion") v2.2.0
                             </button>
                         }
                         else if (!equipment.IsOnline)
                         {
                             <button class="btn btn-secondary" disabled>
-                                <i class="fas fa-exclamation-triangle"></i> Equipment Offline
+                                <i class="fas fa-exclamation-triangle"></i> @GetLocalizedString("EquipmentOffline")
                             </button>
                         }
                         else
                         {
                             <button class="btn btn-warning" disabled>
-                                <i class="fas fa-clock"></i> Equipment Busy
+                                <i class="fas fa-clock"></i> @GetLocalizedString("EquipmentBusy")
                             </button>
                         }
                     </div>
@@ -84,8 +100,8 @@
 {
     <div class="text-center py-5">
         <i class="fas fa-server fa-3x text-muted mb-3"></i>
-        <h4 class="text-muted">No Equipment Found</h4>
-        <p class="text-muted">No equipment has been configured yet.</p>
+        <h4 class="text-muted">@GetLocalizedString("NoEquipmentFound")</h4>
+        <p class="text-muted">@GetLocalizedString("NoEquipmentConfigured")</p>
     </div>
 }
 
@@ -97,10 +113,10 @@
             const progressBar = progress.find('.progress-bar');
             const progressText = progress.find('.progress-text');
             
-            if (confirm('Are you sure you want to update this equipment? This process may take several minutes.')) {
+            if (confirm('@GetLocalizedString("ConfirmUpdateEquipment")')) {
                 // 버튼 비활성화
                 btn.prop('disabled', true);
-                btn.html('<i class="fas fa-spinner fa-spin"></i> Starting Update...');
+                btn.html('<i class="fas fa-spinner fa-spin"></i> @GetLocalizedString("StartingUpdate")');
                 
                 // 진행 표시줄 표시
                 progress.show();
@@ -126,8 +142,8 @@
                             progressText.text('100%');
                             
                             setTimeout(() => {
-                                showNotification('Equipment updated successfully!', 'success');
-                                btn.html('<i class="fas fa-check"></i> Update Complete');
+                                showNotification('@GetLocalizedString("EquipmentUpdatedSuccessfully")', 'success');
+                                btn.html('<i class="fas fa-check"></i> @GetLocalizedString("UpdateComplete")');
                                 btn.removeClass('btn-primary').addClass('btn-success');
                                 
                                 // 3초 후 페이지 새로고침
@@ -136,13 +152,13 @@
                                 }, 3000);
                             }, 1000);
                         } else {
-                            showNotification(response.message || 'Update failed!', 'danger');
+                            showNotification(response.message || '@GetLocalizedString("UpdateFailed")', 'danger');
                             resetButton(equipmentId);
                         }
                     })
                     .fail(function() {
                         clearInterval(progressInterval);
-                        showNotification('Error occurred during update!', 'danger');
+                        showNotification('@GetLocalizedString("ErrorOccurredDuringUpdate")', 'danger');
                         resetButton(equipmentId);
                     });
             }
@@ -153,7 +169,7 @@
             const progress = $(`#progress-${equipmentId}`);
             
             btn.prop('disabled', false);
-            btn.html('<i class="fas fa-download"></i> Update to v2.2.0');
+            btn.html('<i class="fas fa-download"></i> @GetLocalizedString("UpdateToVersion") v2.2.0');
             progress.hide();
             progress.find('.progress-bar').css('width', '0%');
             progress.find('.progress-text').text('0%');

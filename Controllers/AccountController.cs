@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Localization;
 using System.Security.Claims;
+using System.Globalization;
 
 namespace GPIMSWeb.Controllers
 {
@@ -51,7 +52,8 @@ namespace GPIMSWeb.Controllers
                         HttpOnly = false,
                         Secure = false,
                         SameSite = SameSiteMode.Lax,
-                        Path = "/"
+                        Path = "/",
+                        Domain = null
                     }
                 );
             }
@@ -102,20 +104,42 @@ namespace GPIMSWeb.Controllers
         {
             if (!string.IsNullOrEmpty(culture))
             {
-                // 더 명확한 쿠키 설정
-                var cookieValue = CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture));
+                // 지원되는 문화권인지 확인
+                var supportedCultures = new[] { "en", "ko", "zh" };
+                if (!supportedCultures.Contains(culture))
+                {
+                    culture = "en"; // 기본값으로 설정
+                }
+
+                // 기존 쿠키 완전 삭제
+                var cookieName = CookieRequestCultureProvider.DefaultCookieName;
+                Response.Cookies.Delete(cookieName);
+                Response.Cookies.Delete(cookieName, new CookieOptions { Path = "/" });
+                
+                // 새 쿠키 설정
+                var requestCulture = new RequestCulture(culture, culture);
+                var cookieValue = CookieRequestCultureProvider.MakeCookieValue(requestCulture);
+                
                 Response.Cookies.Append(
-                    CookieRequestCultureProvider.DefaultCookieName,
+                    cookieName,
                     cookieValue,
-                    new CookieOptions 
-                    { 
+                    new CookieOptions
+                    {
                         Expires = DateTimeOffset.UtcNow.AddYears(1),
                         HttpOnly = false,
-                        Secure = Request.IsHttps,
+                        Secure = false, // 개발 환경에서는 false
                         SameSite = SameSiteMode.Lax,
-                        Path = "/"
+                        Path = "/",
+                        Domain = null
                     }
                 );
+                
+                // 즉시 현재 스레드의 문화권도 변경
+                var cultureInfo = new CultureInfo(culture);
+                CultureInfo.CurrentCulture = cultureInfo;
+                CultureInfo.CurrentUICulture = cultureInfo;
+                Thread.CurrentThread.CurrentCulture = cultureInfo;
+                Thread.CurrentThread.CurrentUICulture = cultureInfo;
             }
 
             return LocalRedirect(returnUrl ?? "/");

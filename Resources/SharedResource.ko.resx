@@ -58,6 +58,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  
+  <!-- 기존 항목들 -->
   <data name="Dashboard" xml:space="preserve">
     <value>대시보드</value>
   </data>
@@ -162,5 +164,367 @@
   </data>
   <data name="Discharge" xml:space="preserve">
     <value>방전</value>
+  </data>
+  <data name="NotFound" xml:space="preserve">
+    <value>찾을 수 없음</value>
+  </data>
+  
+  <!-- 새로 추가된 항목들 -->
+  <data name="Detail" xml:space="preserve">
+    <value>상세</value>
+  </data>
+  <data name="RealTimeMonitoring" xml:space="preserve">
+    <value>실시간 모니터링</value>
+  </data>
+  <data name="BackToDashboard" xml:space="preserve">
+    <value>대시보드로 돌아가기</value>
+  </data>
+  <data name="AuxSensors" xml:space="preserve">
+    <value>보조 센서</value>
+  </data>
+  <data name="RealTimeChart" xml:space="preserve">
+    <value>실시간 데이터 차트</value>
+  </data>
+  <data name="RealTimeDataVisualization" xml:space="preserve">
+    <value>실시간 채널 데이터 시각화</value>
+  </data>
+  <data name="ChartDescription" xml:space="preserve">
+    <value>전압, 전류, 전력 추이가 여기에 표시됩니다</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>이름</value>
+  </data>
+  <data name="MinValue" xml:space="preserve">
+    <value>최솟값</value>
+  </data>
+  <data name="MaxValue" xml:space="preserve">
+    <value>최댓값</value>
+  </data>
+  <data name="CurrentValue" xml:space="preserve">
+    <value>현재값</value>
+  </data>
+  <data name="Clear" xml:space="preserve">
+    <value>해제</value>
+  </data>
+  <data name="NoActiveAlarms" xml:space="preserve">
+    <value>활성 알람 없음</value>
+  </data>
+  <data name="AllSystemsNormal" xml:space="preserve">
+    <value>모든 시스템이 정상적으로 작동하고 있습니다.</value>
+  </data>
+  <data name="FailedToClearAlarm" xml:space="preserve">
+    <value>알람 해제 실패</value>
+  </data>
+  <data name="ErrorClearingAlarm" xml:space="preserve">
+    <value>알람 해제 중 오류 발생</value>
+  </data>
+  <data name="Critical" xml:space="preserve">
+    <value>심각</value>
+  </data>
+  <data name="Warning" xml:space="preserve">
+    <value>경고</value>
+  </data>
+  <data name="Info" xml:space="preserve">
+    <value>정보</value>
+  </data>
+  <data name="CV" xml:space="preserve">
+    <value>정전압</value>
+  </data>
+  <data name="CC" xml:space="preserve">
+    <value>정전류</value>
+  </data>
+<!-- 사용자 관리 관련 -->
+  <data name="AddNewUser" xml:space="preserve">
+    <value>새 사용자 추가</value>
+  </data>
+  <data name="Department" xml:space="preserve">
+    <value>부서</value>
+  </data>
+  <data name="Level" xml:space="preserve">
+    <value>권한</value>
+  </data>
+  <data name="LastLogin" xml:space="preserve">
+    <value>마지막 로그인</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>작업</value>
+  </data>
+  <data name="Never" xml:space="preserve">
+    <value>없음</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>편집</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>삭제</value>
+  </data>
+  <data name="ConfirmDeleteUser" xml:space="preserve">
+    <value>사용자를 삭제하시겠습니까</value>
+  </data>
+  <data name="FailedToDeleteUser" xml:space="preserve">
+    <value>사용자 삭제 실패</value>
+  </data>
+  <data name="ErrorDeletingUser" xml:space="preserve">
+    <value>사용자 삭제 중 오류 발생</value>
+  </data>
+  <data name="Admin" xml:space="preserve">
+    <value>관리자</value>
+  </data>
+  <data name="Maintenance" xml:space="preserve">
+    <value>유지보수</value>
+  </data>
+  <data name="Operate" xml:space="preserve">
+    <value>운영자</value>
+  </data>
+  
+  <!-- 설정 페이지 관련 -->
+  <data name="SystemSettings" xml:space="preserve">
+    <value>시스템 설정</value>
+  </data>
+  <data name="EquipmentConfiguration" xml:space="preserve">
+    <value>장비 구성</value>
+  </data>
+  <data name="NumberOfEquipment" xml:space="preserve">
+    <value>장비 수</value>
+  </data>
+  <data name="MaximumEquipmentUnits" xml:space="preserve">
+    <value>최대 32개 장비</value>
+  </data>
+  <data name="ChannelsPerEquipment" xml:space="preserve">
+    <value>장비당 채널 수</value>
+  </data>
+  <data name="MaximumChannelsPerEquipment" xml:space="preserve">
+    <value>장비당 최대 64개 채널</value>
+  </data>
+  <data name="SaveEquipmentSettings" xml:space="preserve">
+    <value>장비 설정 저장</value>
+  </data>
+  <data name="LanguageSettings" xml:space="preserve">
+    <value>언어 설정</value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>참고</value>
+  </data>
+  <data name="DefaultLanguageNote" xml:space="preserve">
+    <value>기본 언어는 개인 언어 설정을 선택하지 않은 사용자에게 적용됩니다.</value>
+  </data>
+  <data name="DefaultLanguage" xml:space="preserve">
+    <value>기본 언어</value>
+  </data>
+  <data name="DefaultLanguageDescription" xml:space="preserve">
+    <value>이 언어는 새 사용자이거나 개인 언어 설정이 없을 때 사용됩니다.</value>
+  </data>
+  <data name="DateFormat" xml:space="preserve">
+    <value>날짜 형식</value>
+  </data>
+  <data name="SaveLanguageSettings" xml:space="preserve">
+    <value>언어 설정 저장</value>
+  </data>
+  <data name="LanguagePrioritySystem" xml:space="preserve">
+    <value>언어 우선순위 시스템</value>
+  </data>
+  <data name="FirstPriority" xml:space="preserve">
+    <value>1순위</value>
+  </data>
+  <data name="PersonalLanguageChoice" xml:space="preserve">
+    <value>개인 언어 선택</value>
+  </data>
+  <data name="PersonalLanguageDescription" xml:space="preserve">
+    <value>네비게이션 메뉴에서 사용자가 선택한 언어 (브라우저 쿠키에 저장)</value>
+  </data>
+  <data name="SecondPriority" xml:space="preserve">
+    <value>2순위</value>
+  </data>
+  <data name="SystemDefaultLanguage" xml:space="preserve">
+    <value>시스템 기본 언어</value>
+  </data>
+  <data name="SystemDefaultDescription" xml:space="preserve">
+    <value>설정에서 지정한 기본 언어 (개인 선택이 없을 때 적용)</value>
+  </data>
+  <data name="ThirdPriority" xml:space="preserve">
+    <value>3순위</value>
+  </data>
+  <data name="SystemFallback" xml:space="preserve">
+    <value>시스템 기본값</value>
+  </data>
+  <data name="SystemFallbackDescription" xml:space="preserve">
+    <value>영어 (다른 모든 옵션이 실패할 때의 하드코딩된 기본값)</value>
+  </data>
+  <data name="SystemInformation" xml:space="preserve">
+    <value>시스템 정보</value>
+  </data>
+  <data name="ApplicationVersion" xml:space="preserve">
+    <value>애플리케이션 버전</value>
+  </data>
+  <data name="Database" xml:space="preserve">
+    <value>데이터베이스</value>
+  </data>
+  <data name="ServerTime" xml:space="preserve">
+    <value>서버 시간</value>
+  </data>
+  <data name="Environment" xml:space="preserve">
+    <value>환경</value>
+  </data>
+  <data name="EquipmentSettingsSavedSuccessfully" xml:space="preserve">
+    <value>장비 설정이 성공적으로 저장되었습니다!</value>
+  </data>
+  <data name="FailedToSaveEquipmentSettings" xml:space="preserve">
+    <value>장비 설정 저장에 실패했습니다!</value>
+  </data>
+  <data name="ErrorSavingEquipmentSettings" xml:space="preserve">
+    <value>장비 설정 저장 중 오류가 발생했습니다!</value>
+  </data>
+  <data name="LanguageSettingsSavedSuccessfully" xml:space="preserve">
+    <value>언어 설정이 성공적으로 저장되었습니다!</value>
+  </data>
+  <data name="FailedToSaveLanguageSettings" xml:space="preserve">
+    <value>언어 설정 저장에 실패했습니다!</value>
+  </data>
+  <data name="ErrorSavingLanguageSettings" xml:space="preserve">
+    <value>언어 설정 저장 중 오류가 발생했습니다!</value>
+  </data>
+<!-- Equipment Update 관련 -->
+  <data name="EquipmentProgramUpdate" xml:space="preserve">
+    <value>장비 프로그램 업데이트</value>
+  </data>
+  <data name="CurrentVersion" xml:space="preserve">
+    <value>현재 버전</value>
+  </data>
+  <data name="UpdateToVersion" xml:space="preserve">
+    <value>업데이트</value>
+  </data>
+  <data name="EquipmentOffline" xml:space="preserve">
+    <value>장비 오프라인</value>
+  </data>
+  <data name="EquipmentBusy" xml:space="preserve">
+    <value>장비 사용 중</value>
+  </data>
+  <data name="NoEquipmentFound" xml:space="preserve">
+    <value>장비를 찾을 수 없음</value>
+  </data>
+  <data name="NoEquipmentConfigured" xml:space="preserve">
+    <value>아직 구성된 장비가 없습니다.</value>
+  </data>
+  <data name="ConfirmUpdateEquipment" xml:space="preserve">
+    <value>이 장비를 업데이트하시겠습니까? 이 과정은 몇 분이 걸릴 수 있습니다.</value>
+  </data>
+  <data name="StartingUpdate" xml:space="preserve">
+    <value>업데이트 시작 중...</value>
+  </data>
+  <data name="EquipmentUpdatedSuccessfully" xml:space="preserve">
+    <value>장비가 성공적으로 업데이트되었습니다!</value>
+  </data>
+  <data name="UpdateComplete" xml:space="preserve">
+    <value>업데이트 완료</value>
+  </data>
+  <data name="UpdateFailed" xml:space="preserve">
+    <value>업데이트 실패!</value>
+  </data>
+  <data name="ErrorOccurredDuringUpdate" xml:space="preserve">
+    <value>업데이트 중 오류가 발생했습니다!</value>
+  </data>
+
+  <!-- User History 관련 -->
+  <data name="UserActivityHistory" xml:space="preserve">
+    <value>사용자 활동 이력</value>
+  </data>
+  <data name="Filter" xml:space="preserve">
+    <value>필터</value>
+  </data>
+  <data name="FromDate" xml:space="preserve">
+    <value>시작 날짜</value>
+  </data>
+  <data name="ToDate" xml:space="preserve">
+    <value>종료 날짜</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>사용자</value>
+  </data>
+  <data name="AdminOnly" xml:space="preserve">
+    <value>관리자만</value>
+  </data>
+  <data name="UserId" xml:space="preserve">
+    <value>사용자 ID</value>
+  </data>
+  <data name="ActivityLog" xml:space="preserve">
+    <value>활동 로그</value>
+  </data>
+  <data name="Action" xml:space="preserve">
+    <value>액션</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>상세 내용</value>
+  </data>
+  <data name="IpAddress" xml:space="preserve">
+    <value>IP 주소</value>
+  </data>
+  <data name="DateTime" xml:space="preserve">
+    <value>날짜 및 시간</value>
+  </data>
+  <data name="NoHistoryFound" xml:space="preserve">
+    <value>이력이 없습니다</value>
+  </data>
+  <data name="NoActivityRecordsMatch" xml:space="preserve">
+    <value>검색 조건에 맞는 활동 기록이 없습니다.</value>
+  </data>
+  <data name="ShowingRecords" xml:space="preserve">
+    <value>표시 중인 기록</value>
+  </data>
+  <data name="Records" xml:space="preserve">
+    <value>건</value>
+  </data>
+  <data name="MaxRecordsNote" xml:space="preserve">
+    <value>최대 1000건까지 표시</value>
+  </data>
+  <data name="ActionLegend" xml:space="preserve">
+    <value>액션 범례</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>생성</value>
+  </data>
+  <data name="View" xml:space="preserve">
+    <value>조회</value>
+  </data>
+
+  <!-- 액션 관련 -->
+  <data name="ViewEquipment" xml:space="preserve">
+    <value>장비 조회</value>
+  </data>
+  <data name="ClearAlarm" xml:space="preserve">
+    <value>알람 해제</value>
+  </data>
+  <data name="CreateUser" xml:space="preserve">
+    <value>사용자 생성</value>
+  </data>
+  <data name="UpdateUser" xml:space="preserve">
+    <value>사용자 수정</value>
+  </data>
+  <data name="DeleteUser" xml:space="preserve">
+    <value>사용자 삭제</value>
+  </data>
+  <data name="UpdateSettings" xml:space="preserve">
+    <value>설정 업데이트</value>
+  </data>
+  <data name="UpdateEquipment" xml:space="preserve">
+    <value>장비 업데이트</value>
+  </data>
+  <!-- 로그인 페이지 관련 -->
+  <data name="EquipmentMonitoringSystem" xml:space="preserve">
+    <value>장비 모니터링 시스템</value>
+  </data>
+  <data name="EnterUsername" xml:space="preserve">
+    <value>사용자명을 입력하세요</value>
+  </data>
+  <data name="EnterPassword" xml:space="preserve">
+    <value>비밀번호를 입력하세요</value>
+  </data>
+  <data name="PreferredLanguage" xml:space="preserve">
+    <value>선호 언어</value>
+  </data>
+  <data name="LanguageWillBeSaved" xml:space="preserve">
+    <value>이 언어 설정은 향후 로그인을 위해 저장됩니다</value>
+  </data>
+  <data name="DefaultCredentials" xml:space="preserve">
+    <value>기본 계정</value>
   </data>
 </root>

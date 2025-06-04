@@ -6,15 +6,12 @@
 @inject IStringLocalizer<SharedResource> Localizer
 @model List<Equipment>
 @{
-    ViewData["Title"] = "대시보드"; // 하드코딩으로 임시 해결
-    
     // 직접 ResourceManager 사용하는 함수
     string GetLocalizedString(string key) 
     {
         try 
         {
             var resourceManager = new ResourceManager("GPIMSWeb.Resources.SharedResource", Assembly.GetExecutingAssembly());
-            string dd = resourceManager.GetString(key, CultureInfo.CurrentUICulture) ?? key;
             return resourceManager.GetString(key, CultureInfo.CurrentUICulture) ?? key;
         }
         catch 
@@ -22,54 +19,26 @@
             return key;
         }
     }
+    
+    ViewData["Title"] = GetLocalizedString("Dashboard");
 }
 
-<!-- 디버깅 정보 추가 -->
-<div style="background: red; color: white; padding: 20px; margin: 10px; font-family: monospace;">
-    <h3>🐛 DETAILED DEBUG</h3>
-    
-    <strong>1. Culture Info:</strong><br>
+<!-- 디버깅 정보 (필요시 주석 해제) -->
+@*
+<div style="background: yellow; padding: 10px; margin: 10px; border: 1px solid red;">
+    <strong>🐛 DEBUG INFO:</strong><br>
     Current Culture: @CultureInfo.CurrentCulture.Name<br>
-    Current UI Culture: @CultureInfo.CurrentUICulture.Name<br><br>
-    
-    <strong>2. Resource Test:</strong><br>
-    Dashboard = "@Localizer["Dashboard"]"<br>
-    Equipment = "@Localizer["Equipment"]"<br>
-    Status = "@Localizer["Status"]"<br><br>
-    
-    <strong>3. Resource Manager Test:</strong><br>
-    @{
-        try 
-        {
-            var resourceManager = new ResourceManager("GPIMSWeb.Resources.SharedResource", Assembly.GetExecutingAssembly());
-            var dashboardDirect = resourceManager.GetString("Dashboard", new CultureInfo("ko"));
-            <text>Direct Dashboard (ko): @dashboardDirect<br></text>
-            
-            var equipmentDirect = resourceManager.GetString("Equipment", new CultureInfo("ko"));
-            <text>Direct Equipment (ko): @equipmentDirect<br></text>
-        }
-        catch (Exception ex)
-        {
-            <text>Resource Manager Error: @ex.Message<br></text>
-        }
-    }
-    
-    <strong>4. Assembly Resources:</strong><br>
-    @{
-        var assembly = Assembly.GetExecutingAssembly();
-        var resourceNames = assembly.GetManifestResourceNames();
-        foreach(var name in resourceNames.Where(n => n.Contains("SharedResource")))
-        {
-            <text>Found: @name<br></text>
-        }
-    }
+    Current UI Culture: @CultureInfo.CurrentUICulture.Name<br>
+    Dashboard = "@GetLocalizedString("Dashboard")"<br>
+    Equipment = "@GetLocalizedString("Equipment")"<br>
 </div>
+*@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="fas fa-tachometer-alt"></i> @GetLocalizedString("Equipment") @GetLocalizedString("Status") Overview</h2>
+    <h2><i class="fas fa-tachometer-alt"></i> @GetLocalizedString("Dashboard")</h2>
     <div class="btn-group" role="group">
         <button type="button" class="btn btn-outline-primary" onclick="refreshData()">
-            <i class="fas fa-sync-alt"></i> Refresh
+            <i class="fas fa-sync-alt"></i> @GetLocalizedString("Update")
         </button>
     </div>
 </div>
@@ -91,13 +60,13 @@
                     <p class="card-text">
                         <small class="text-muted">
                             @equipment.Channels.Count(c => c.Status == ChannelStatus.Active) @GetLocalizedString("Channels") @GetLocalizedString("Active")<br>
-                            Last Update: @equipment.LastUpdateTime.ToString("yyyy-MM-dd HH:mm:ss")
+                            @GetLocalizedString("LastUpdate"): @equipment.LastUpdateTime.ToString("yyyy-MM-dd HH:mm:ss")
                         </small>
                     </p>
                     @if (equipment.Alarms.Any())
                     {
                         <div class="alert alert-warning alert-sm mb-0">
-                            <i class="fas fa-exclamation-triangle"></i> @equipment.Alarms.Count @GetLocalizedString("Active") @GetLocalizedString("Alarms")
+                            <i class="fas fa-exclamation-triangle"></i> @equipment.Alarms.Count @GetLocalizedString("Alarms")
                         </div>
                     }
                 </div>
@@ -110,7 +79,7 @@
 {
     <div class="text-center py-5">
         <i class="fas fa-server fa-3x text-muted mb-3"></i>
-        <h4 class="text-muted">No Equipment Found</h4>
+        <h4 class="text-muted">@GetLocalizedString("Equipment") @GetLocalizedString("NotFound")</h4>
         <p class="text-muted">No equipment has been configured yet.</p>
     </div>
 }
@@ -153,7 +122,6 @@
 
         // 새로운 알람 수신
         connection.on("NewAlarm", function (alarm) {
-            // 알람 알림 표시
             showAlarmNotification(alarm);
         });
 
@@ -161,16 +129,14 @@
             const alertHtml = `
                 <div class="alert alert-warning alert-dismissible fade show" role="alert">
                     <i class="fas fa-exclamation-triangle"></i> 
-                    <strong>Equipment #${alarm.equipmentId}:</strong> ${alarm.message}
+                    <strong>@GetLocalizedString("Equipment") #${alarm.equipmentId}:</strong> ${alarm.message}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             `;
             
-            // 페이지 상단에 알림 추가
             const container = $('.container-fluid main');
             container.prepend(alertHtml);
             
-            // 5초 후 자동 제거
             setTimeout(() => {
                 $('.alert').first().fadeOut();
             }, 5000);

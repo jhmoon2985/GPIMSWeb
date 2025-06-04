@@ -1,12 +1,28 @@
+@using System.Reflection
+@using System.Resources
+@using System.Globalization
 @model List<UserViewModel>
 @{
-    ViewData["Title"] = "User Management";
+    string GetLocalizedString(string key) 
+    {
+        try 
+        {
+            var resourceManager = new ResourceManager("GPIMSWeb.Resources.SharedResource", Assembly.GetExecutingAssembly());
+            return resourceManager.GetString(key, CultureInfo.CurrentUICulture) ?? key;
+        }
+        catch 
+        {
+            return key;
+        }
+    }
+    
+    ViewData["Title"] = GetLocalizedString("UserManagement");
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="fas fa-users"></i> User Management</h2>
+    <h2><i class="fas fa-users"></i> @GetLocalizedString("UserManagement")</h2>
     <a href="@Url.Action("Create")" class="btn btn-primary">
-        <i class="fas fa-plus"></i> Add New User
+        <i class="fas fa-plus"></i> @GetLocalizedString("AddNewUser")
     </a>
 </div>
 
@@ -16,12 +32,12 @@
             <table class="table table-striped">
                 <thead class="table-dark">
                     <tr>
-                        <th>Username</th>
-                        <th>Name</th>
-                        <th>Department</th>
-                        <th>Level</th>
-                        <th>Last Login</th>
-                        <th>Actions</th>
+                        <th>@GetLocalizedString("Username")</th>
+                        <th>@GetLocalizedString("Name")</th>
+                        <th>@GetLocalizedString("Department")</th>
+                        <th>@GetLocalizedString("Level")</th>
+                        <th>@GetLocalizedString("LastLogin")</th>
+                        <th>@GetLocalizedString("Actions")</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -33,17 +49,17 @@
                             <td>@(string.IsNullOrEmpty(user.Department) ? "-" : user.Department)</td>
                             <td>
                                 <span class="badge bg-@(user.Level == UserLevel.Admin ? "primary" : user.Level == UserLevel.Maintenance ? "warning" : "info")">
-                                    @user.Level
+                                    @GetLocalizedString(user.Level.ToString())
                                 </span>
                             </td>
-                            <td>@(user.LastLoginAt?.ToString("yyyy-MM-dd HH:mm") ?? "Never")</td>
+                            <td>@(user.LastLoginAt?.ToString("yyyy-MM-dd HH:mm") ?? GetLocalizedString("Never"))</td>
                             <td>
                                 <div class="btn-group btn-group-sm" role="group">
                                     <a href="@Url.Action("Edit", new { id = user.Id })" class="btn btn-outline-primary">
-                                        <i class="fas fa-edit"></i> Edit
+                                        <i class="fas fa-edit"></i> @GetLocalizedString("Edit")
                                     </a>
                                     <button type="button" class="btn btn-outline-danger" onclick="deleteUser(@user.Id, '@user.Username')">
-                                        <i class="fas fa-trash"></i> Delete
+                                        <i class="fas fa-trash"></i> @GetLocalizedString("Delete")
                                     </button>
                                 </div>
                             </td>
@@ -58,17 +74,17 @@
 @section Scripts {
     <script>
         function deleteUser(userId, username) {
-            if (confirm(`Are you sure you want to delete user "${username}"?`)) {
+            if (confirm('@GetLocalizedString("ConfirmDeleteUser")' + ' "' + username + '"?')) {
                 $.post('@Url.Action("Delete")', { id: userId })
                     .done(function(response) {
                         if (response.success) {
                             location.reload();
                         } else {
-                            alert(response.message || 'Failed to delete user');
+                            alert(response.message || '@GetLocalizedString("FailedToDeleteUser")');
                         }
                     })
                     .fail(function() {
-                        alert('Error deleting user');
+                        alert('@GetLocalizedString("ErrorDeletingUser")');
                     });
             }
         }

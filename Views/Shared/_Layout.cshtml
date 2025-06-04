@@ -1,6 +1,23 @@
 ﻿@using Microsoft.Extensions.Localization
 @using GPIMSWeb.Resources
+@using System.Reflection
+@using System.Resources
+@using System.Globalization
 @inject IStringLocalizer<SharedResource> Localizer
+@{
+    string GetLocalizedString(string key) 
+    {
+        try 
+        {
+            var resourceManager = new ResourceManager("GPIMSWeb.Resources.SharedResource", Assembly.GetExecutingAssembly());
+            return resourceManager.GetString(key, CultureInfo.CurrentUICulture) ?? key;
+        }
+        catch 
+        {
+            return key;
+        }
+    }
+}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -26,27 +43,27 @@
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="Home" asp-action="Index">
-                                <i class="fas fa-tachometer-alt"></i> @Localizer["Dashboard"]
+                                <i class="fas fa-tachometer-alt"></i> @GetLocalizedString("Dashboard")
                             </a>
                         </li>
                         @if (User.IsInRole("Admin"))
                         {
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="User" asp-action="Index">
-                                    <i class="fas fa-users"></i> @Localizer["UserManagement"]
+                                    <i class="fas fa-users"></i> @GetLocalizedString("UserManagement")
                                 </a>
                             </li>
                         }
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="User" asp-action="History">
-                                <i class="fas fa-history"></i> @Localizer["UserHistory"]
+                                <i class="fas fa-history"></i> @GetLocalizedString("UserHistory")
                             </a>
                         </li>
                         @if (User.IsInRole("Admin") || User.IsInRole("Maintenance"))
                         {
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Equipment" asp-action="Update">
-                                    <i class="fas fa-download"></i> @Localizer["EquipmentUpdate"]
+                                    <i class="fas fa-download"></i> @GetLocalizedString("EquipmentUpdate")
                                 </a>
                             </li>
                         }
@@ -54,7 +71,7 @@
                         {
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Settings" asp-action="Index">
-                                    <i class="fas fa-cogs"></i> @Localizer["Settings"]
+                                    <i class="fas fa-cogs"></i> @GetLocalizedString("Settings")
                                 </a>
                             </li>
                         }
@@ -62,7 +79,7 @@
                     <div class="navbar-nav">
                         <div class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-globe"></i> @Localizer["Language"]
+                                <i class="fas fa-globe"></i> @GetLocalizedString("Language")
                             </a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="javascript:void(0)" onclick="setLanguage('en')">English</a></li>
@@ -76,7 +93,7 @@
                         <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
                             @Html.AntiForgeryToken()
                             <button type="submit" class="btn btn-outline-light btn-sm">
-                                <i class="fas fa-sign-out-alt"></i> @Localizer["Logout"]
+                                <i class="fas fa-sign-out-alt"></i> @GetLocalizedString("Logout")
                             </button>
                         </form>
                     </div>
@@ -95,14 +112,46 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/lib/signalr/dist/browser/signalr.min.js"></script>
     
-    <!-- CSRF 토큰을 숨겨진 필드로 추가 -->
     @Html.AntiForgeryToken()
     
     <script>
         function setLanguage(culture) {
-            // 단순히 쿠키를 설정하고 페이지를 새로고침
-            document.cookie = `AspNetCore.Culture=c=${culture}|uic=${culture}; path=/; expires=${new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString()}`;
-            window.location.reload();
+            // 기존 쿠키 삭제
+            document.cookie = "AspNetCore.Culture=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+            document.cookie = ".AspNetCore.Culture=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+            
+            // 새 쿠키 설정
+            const cookieValue = `c=${culture}|uic=${culture}`;
+            const expireDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString();
+            
+            document.cookie = `AspNetCore.Culture=${cookieValue}; path=/; expires=${expireDate}; SameSite=Lax`;
+            
+            // 서버에 언어 변경 요청 후 새로고침
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '@Url.Action("SetLanguage", "Account")';
+            
+            const cultureInput = document.createElement('input');
+            cultureInput.type = 'hidden';
+            cultureInput.name = 'culture';
+            cultureInput.value = culture;
+            
+            const tokenInput = document.createElement('input');
+            tokenInput.type = 'hidden';
+            tokenInput.name = '__RequestVerificationToken';
+            tokenInput.value = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            
+            const returnUrlInput = document.createElement('input');
+            returnUrlInput.type = 'hidden';
+            returnUrlInput.name = 'returnUrl';
+            returnUrlInput.value = window.location.pathname;
+            
+            form.appendChild(cultureInput);
+            form.appendChild(tokenInput);
+            form.appendChild(returnUrlInput);
+            
+            document.body.appendChild(form);
+            form.submit();
         }
     </script>
     

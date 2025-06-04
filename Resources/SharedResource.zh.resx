@@ -1,5 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  
+  <!-- 기본 네비게이션 및 메뉴 -->
   <data name="Dashboard" xml:space="preserve">
     <value>仪表板</value>
   </data>
@@ -21,6 +81,8 @@
   <data name="Logout" xml:space="preserve">
     <value>登出</value>
   </data>
+  
+  <!-- 로그인 관련 -->
   <data name="Login" xml:space="preserve">
     <value>登录</value>
   </data>
@@ -30,6 +92,26 @@
   <data name="Password" xml:space="preserve">
     <value>密码</value>
   </data>
+  <data name="EquipmentMonitoringSystem" xml:space="preserve">
+    <value>设备监控系统</value>
+  </data>
+  <data name="EnterUsername" xml:space="preserve">
+    <value>请输入用户名</value>
+  </data>
+  <data name="EnterPassword" xml:space="preserve">
+    <value>请输入密码</value>
+  </data>
+  <data name="PreferredLanguage" xml:space="preserve">
+    <value>首选语言</value>
+  </data>
+  <data name="LanguageWillBeSaved" xml:space="preserve">
+    <value>此语言偏好将保存以供将来登录使用</value>
+  </data>
+  <data name="DefaultCredentials" xml:space="preserve">
+    <value>默认凭据</value>
+  </data>
+  
+  <!-- 장비 관련 -->
   <data name="Equipment" xml:space="preserve">
     <value>设备</value>
   </data>
@@ -78,9 +160,6 @@
   <data name="Error" xml:space="preserve">
     <value>错误</value>
   </data>
-  <data name="EquipmentUpdate" xml:space="preserve">
-  <value>设备更新</value>
-  </data>
   <data name="Update" xml:space="preserve">
     <value>更新</value>
   </data>
@@ -107,5 +186,350 @@
   </data>
   <data name="Discharge" xml:space="preserve">
     <value>放电</value>
+  </data>
+  <data name="CV" xml:space="preserve">
+    <value>恒压</value>
+  </data>
+  <data name="CC" xml:space="preserve">
+    <value>恒流</value>
+  </data>
+  <data name="NotFound" xml:space="preserve">
+    <value>未找到</value>
+  </data>
+  
+  <!-- 장비 상세 관련 -->
+  <data name="Detail" xml:space="preserve">
+    <value>详情</value>
+  </data>
+  <data name="RealTimeMonitoring" xml:space="preserve">
+    <value>实时监控</value>
+  </data>
+  <data name="BackToDashboard" xml:space="preserve">
+    <value>返回仪表板</value>
+  </data>
+  <data name="AuxSensors" xml:space="preserve">
+    <value>辅助传感器</value>
+  </data>
+  <data name="RealTimeChart" xml:space="preserve">
+    <value>实时数据图表</value>
+  </data>
+  <data name="RealTimeDataVisualization" xml:space="preserve">
+    <value>实时通道数据可视化</value>
+  </data>
+  <data name="ChartDescription" xml:space="preserve">
+    <value>电压、电流、功率趋势将在此处显示</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>名称</value>
+  </data>
+  <data name="MinValue" xml:space="preserve">
+    <value>最小值</value>
+  </data>
+  <data name="MaxValue" xml:space="preserve">
+    <value>最大值</value>
+  </data>
+  <data name="CurrentValue" xml:space="preserve">
+    <value>当前值</value>
+  </data>
+  <data name="Clear" xml:space="preserve">
+    <value>清除</value>
+  </data>
+  <data name="NoActiveAlarms" xml:space="preserve">
+    <value>无活动报警</value>
+  </data>
+  <data name="AllSystemsNormal" xml:space="preserve">
+    <value>所有系统运行正常。</value>
+  </data>
+  <data name="FailedToClearAlarm" xml:space="preserve">
+    <value>清除报警失败</value>
+  </data>
+  <data name="ErrorClearingAlarm" xml:space="preserve">
+    <value>清除报警时出错</value>
+  </data>
+  <data name="Critical" xml:space="preserve">
+    <value>严重</value>
+  </data>
+  <data name="Warning" xml:space="preserve">
+    <value>警告</value>
+  </data>
+  <data name="Info" xml:space="preserve">
+    <value>信息</value>
+  </data>
+  
+  <!-- 장비 업데이트 관련 -->
+  <data name="EquipmentProgramUpdate" xml:space="preserve">
+    <value>设备程序更新</value>
+  </data>
+  <data name="CurrentVersion" xml:space="preserve">
+    <value>当前版本</value>
+  </data>
+  <data name="UpdateToVersion" xml:space="preserve">
+    <value>更新到</value>
+  </data>
+  <data name="EquipmentOffline" xml:space="preserve">
+    <value>设备离线</value>
+  </data>
+  <data name="EquipmentBusy" xml:space="preserve">
+    <value>设备忙碌</value>
+  </data>
+  <data name="NoEquipmentFound" xml:space="preserve">
+    <value>未找到设备</value>
+  </data>
+  <data name="NoEquipmentConfigured" xml:space="preserve">
+    <value>尚未配置任何设备。</value>
+  </data>
+  <data name="ConfirmUpdateEquipment" xml:space="preserve">
+    <value>您确定要更新此设备吗？此过程可能需要几分钟。</value>
+  </data>
+  <data name="StartingUpdate" xml:space="preserve">
+    <value>开始更新...</value>
+  </data>
+  <data name="EquipmentUpdatedSuccessfully" xml:space="preserve">
+    <value>设备更新成功！</value>
+  </data>
+  <data name="UpdateComplete" xml:space="preserve">
+    <value>更新完成</value>
+  </data>
+  <data name="UpdateFailed" xml:space="preserve">
+    <value>更新失败！</value>
+  </data>
+  <data name="ErrorOccurredDuringUpdate" xml:space="preserve">
+    <value>更新过程中发生错误！</value>
+  </data>
+  
+  <!-- 사용자 관리 관련 -->
+  <data name="AddNewUser" xml:space="preserve">
+    <value>添加新用户</value>
+  </data>
+  <data name="Department" xml:space="preserve">
+    <value>部门</value>
+  </data>
+  <data name="Level" xml:space="preserve">
+    <value>级别</value>
+  </data>
+  <data name="LastLogin" xml:space="preserve">
+    <value>最后登录</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>操作</value>
+  </data>
+  <data name="Never" xml:space="preserve">
+    <value>从未</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>编辑</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>删除</value>
+  </data>
+  <data name="ConfirmDeleteUser" xml:space="preserve">
+    <value>您确定要删除用户</value>
+  </data>
+  <data name="FailedToDeleteUser" xml:space="preserve">
+    <value>删除用户失败</value>
+  </data>
+  <data name="ErrorDeletingUser" xml:space="preserve">
+    <value>删除用户时出错</value>
+  </data>
+  <data name="Admin" xml:space="preserve">
+    <value>管理员</value>
+  </data>
+  <data name="Maintenance" xml:space="preserve">
+    <value>维护</value>
+  </data>
+  <data name="Operate" xml:space="preserve">
+    <value>操作员</value>
+  </data>
+  
+  <!-- 사용자 이력 관련 -->
+  <data name="UserActivityHistory" xml:space="preserve">
+    <value>用户活动历史</value>
+  </data>
+  <data name="Filter" xml:space="preserve">
+    <value>筛选</value>
+  </data>
+  <data name="FromDate" xml:space="preserve">
+    <value>开始日期</value>
+  </data>
+  <data name="ToDate" xml:space="preserve">
+    <value>结束日期</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>用户</value>
+  </data>
+  <data name="AdminOnly" xml:space="preserve">
+    <value>仅管理员</value>
+  </data>
+  <data name="UserId" xml:space="preserve">
+    <value>用户ID</value>
+  </data>
+  <data name="ActivityLog" xml:space="preserve">
+    <value>活动日志</value>
+  </data>
+  <data name="Action" xml:space="preserve">
+    <value>操作</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>详情</value>
+  </data>
+  <data name="IpAddress" xml:space="preserve">
+    <value>IP地址</value>
+  </data>
+  <data name="DateTime" xml:space="preserve">
+    <value>日期和时间</value>
+  </data>
+  <data name="NoHistoryFound" xml:space="preserve">
+    <value>未找到历史记录</value>
+  </data>
+  <data name="NoActivityRecordsMatch" xml:space="preserve">
+    <value>没有符合您搜索条件的活动记录。</value>
+  </data>
+  <data name="ShowingRecords" xml:space="preserve">
+    <value>显示记录</value>
+  </data>
+  <data name="Records" xml:space="preserve">
+    <value>条</value>
+  </data>
+  <data name="MaxRecordsNote" xml:space="preserve">
+    <value>最多显示1000条记录</value>
+  </data>
+  <data name="ActionLegend" xml:space="preserve">
+    <value>操作图例</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>创建</value>
+  </data>
+  <data name="View" xml:space="preserve">
+    <value>查看</value>
+  </data>
+  
+  <!-- 설정 관련 -->
+  <data name="SystemSettings" xml:space="preserve">
+    <value>系统设置</value>
+  </data>
+  <data name="EquipmentConfiguration" xml:space="preserve">
+    <value>设备配置</value>
+  </data>
+  <data name="NumberOfEquipment" xml:space="preserve">
+    <value>设备数量</value>
+  </data>
+  <data name="MaximumEquipmentUnits" xml:space="preserve">
+    <value>最多32台设备</value>
+  </data>
+  <data name="ChannelsPerEquipment" xml:space="preserve">
+    <value>每台设备的通道数</value>
+  </data>
+  <data name="MaximumChannelsPerEquipment" xml:space="preserve">
+    <value>每台设备最多64个通道</value>
+  </data>
+  <data name="SaveEquipmentSettings" xml:space="preserve">
+    <value>保存设备设置</value>
+  </data>
+  <data name="LanguageSettings" xml:space="preserve">
+    <value>语言设置</value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>注意</value>
+  </data>
+  <data name="DefaultLanguageNote" xml:space="preserve">
+    <value>默认语言适用于未选择个人语言偏好的用户。</value>
+  </data>
+  <data name="DefaultLanguage" xml:space="preserve">
+    <value>默认语言</value>
+  </data>
+  <data name="DefaultLanguageDescription" xml:space="preserve">
+    <value>此语言将用于新用户或未设置个人语言偏好时。</value>
+  </data>
+  <data name="DateFormat" xml:space="preserve">
+    <value>日期格式</value>
+  </data>
+  <data name="SaveLanguageSettings" xml:space="preserve">
+    <value>保存语言设置</value>
+  </data>
+  <data name="LanguagePrioritySystem" xml:space="preserve">
+    <value>语言优先级系统</value>
+  </data>
+  <data name="FirstPriority" xml:space="preserve">
+    <value>第一优先级</value>
+  </data>
+  <data name="PersonalLanguageChoice" xml:space="preserve">
+    <value>个人语言选择</value>
+  </data>
+  <data name="PersonalLanguageDescription" xml:space="preserve">
+    <value>用户从导航菜单选择的语言（存储在浏览器cookie中）</value>
+  </data>
+  <data name="SecondPriority" xml:space="preserve">
+    <value>第二优先级</value>
+  </data>
+  <data name="SystemDefaultLanguage" xml:space="preserve">
+    <value>系统默认语言</value>
+  </data>
+  <data name="SystemDefaultDescription" xml:space="preserve">
+    <value>在设置中设定的默认语言（在没有个人选择时适用）</value>
+  </data>
+  <data name="ThirdPriority" xml:space="preserve">
+    <value>第三优先级</value>
+  </data>
+  <data name="SystemFallback" xml:space="preserve">
+    <value>系统后备</value>
+  </data>
+  <data name="SystemFallbackDescription" xml:space="preserve">
+    <value>英语（如果所有其他选项都失败的硬编码后备）</value>
+  </data>
+  <data name="SystemInformation" xml:space="preserve">
+    <value>系统信息</value>
+  </data>
+  <data name="ApplicationVersion" xml:space="preserve">
+    <value>应用程序版本</value>
+  </data>
+  <data name="Database" xml:space="preserve">
+    <value>数据库</value>
+  </data>
+  <data name="ServerTime" xml:space="preserve">
+    <value>服务器时间</value>
+  </data>
+  <data name="Environment" xml:space="preserve">
+    <value>环境</value>
+  </data>
+  <data name="EquipmentSettingsSavedSuccessfully" xml:space="preserve">
+    <value>设备设置保存成功！</value>
+  </data>
+  <data name="FailedToSaveEquipmentSettings" xml:space="preserve">
+    <value>保存设备设置失败！</value>
+  </data>
+  <data name="ErrorSavingEquipmentSettings" xml:space="preserve">
+    <value>保存设备设置时出错！</value>
+  </data>
+  <data name="LanguageSettingsSavedSuccessfully" xml:space="preserve">
+    <value>语言设置保存成功！</value>
+  </data>
+  <data name="FailedToSaveLanguageSettings" xml:space="preserve">
+    <value>保存语言设置失败！</value>
+  </data>
+  <data name="ErrorSavingLanguageSettings" xml:space="preserve">
+    <value>保存语言设置时出错！</value>
+  </data>
+  
+  <!-- 액션 관련 -->
+  <data name="ViewEquipment" xml:space="preserve">
+    <value>查看设备</value>
+  </data>
+  <data name="ClearAlarm" xml:space="preserve">
+    <value>清除报警</value>
+  </data>
+  <data name="CreateUser" xml:space="preserve">
+    <value>创建用户</value>
+  </data>
+  <data name="UpdateUser" xml:space="preserve">
+    <value>更新用户</value>
+  </data>
+  <data name="DeleteUser" xml:space="preserve">
+    <value>删除用户</value>
+  </data>
+  <data name="UpdateSettings" xml:space="preserve">
+    <value>更新设置</value>
+  </data>
+  <data name="UpdateEquipment" xml:space="preserve">
+    <value>更新设备</value>
   </data>
 </root>

@@ -34,7 +34,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEquipmentService, EquipmentService>();
 builder.Services.AddSingleton<IRealtimeDataService, RealtimeDataService>();
 
-// Localization - 수정된 부분
+// Localization
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 
 builder.Services.Configure<RequestLocalizationOptions>(options =>
@@ -42,7 +42,7 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     var supportedCultures = new[]
     {
         new CultureInfo("en"),
-        new CultureInfo("ko"),
+        new CultureInfo("ko"), 
         new CultureInfo("zh")
     };
 
@@ -50,10 +50,10 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.SupportedCultures = supportedCultures;
     options.SupportedUICultures = supportedCultures;
     
-    // Provider 순서를 바꿔서 기본값을 우선으로
     options.RequestCultureProviders.Clear();
     options.RequestCultureProviders.Add(new CookieRequestCultureProvider());
     options.RequestCultureProviders.Add(new QueryStringRequestCultureProvider());
+    options.RequestCultureProviders.Add(new AcceptLanguageHeaderRequestCultureProvider());
 });
 
 var app = builder.Build();
@@ -70,19 +70,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// 강제 문화권 설정
-app.Use(async (context, next) =>
-{
-    var culture = new CultureInfo("en");
-    CultureInfo.CurrentCulture = culture;
-    CultureInfo.CurrentUICulture = culture;
-    Thread.CurrentThread.CurrentCulture = culture;
-    Thread.CurrentThread.CurrentUICulture = culture;
-    await next();
-});
-
-// 중요: 순서가 중요합니다
 app.UseRequestLocalization();
+
 app.UseAuthentication();
 app.UseAuthorization();
 

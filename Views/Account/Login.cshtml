@@ -1,14 +1,58 @@
+@using System.Reflection
+@using System.Resources
+@using System.Globalization
+@using Microsoft.AspNetCore.Localization
 @model LoginViewModel
 @{
     Layout = null;
+    
+    string GetLocalizedString(string key) 
+    {
+        try 
+        {
+            var resourceManager = new ResourceManager("GPIMSWeb.Resources.SharedResource", Assembly.GetExecutingAssembly());
+            return resourceManager.GetString(key, CultureInfo.CurrentUICulture) ?? key;
+        }
+        catch 
+        {
+            return key;
+        }
+    }
+    
+    // 쿠키에서 저장된 언어 가져오기
+    var cultureCookie = Context.Request.Cookies[CookieRequestCultureProvider.DefaultCookieName];
+    var currentLanguage = "en"; // 기본값
+    
+    if (!string.IsNullOrEmpty(cultureCookie))
+    {
+        try
+        {
+            // 쿠키에서 언어 추출 (예: "c=ko|uic=ko" → "ko")
+            var cultureParts = cultureCookie.Split('|');
+            if (cultureParts.Length > 0)
+            {
+                currentLanguage = cultureParts[0].Replace("c=", "");
+            }
+        }
+        catch
+        {
+            currentLanguage = "en";
+        }
+    }
+    
+    // 모델의 Language 속성에 현재 언어 설정
+    if (Model != null && string.IsNullOrEmpty(Model.Language))
+    {
+        Model.Language = currentLanguage;
+    }
 }
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="@currentLanguage">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login - GPIMS Web</title>
+    <title>@GetLocalizedString("Login") - GPIMS Web</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
@@ -38,17 +82,62 @@
             color: #666;
             font-size: 14px;
         }
+        .language-selector {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .language-selector select {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
+    <!-- 페이지 상단 언어 선택기 (즉시 변경용) -->
+    <div class="language-selector">
+        <select id="quickLanguageSelector" class="form-select form-select-sm">
+            @if (currentLanguage == "en")
+            {
+                <option value="en" selected>English</option>
+            }
+            else
+            {
+                <option value="en">English</option>
+            }
+            
+            @if (currentLanguage == "ko")
+            {
+                <option value="ko" selected>한국어</option>
+            }
+            else
+            {
+                <option value="ko">한국어</option>
+            }
+            
+            @if (currentLanguage == "zh")
+            {
+                <option value="zh" selected>中文</option>
+            }
+            else
+            {
+                <option value="zh">中文</option>
+            }
+        </select>
+    </div>
+
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-6">
                 <div class="login-container">
                     <div class="login-header">
                         <i class="fas fa-cog fa-3x text-primary mb-3"></i>
-                        <h2>GPIMS Web Login</h2>
-                        <p>Equipment Monitoring System</p>
+                        <h2>GPIMS Web</h2>
+                        <p>@GetLocalizedString("EquipmentMonitoringSystem")</p>
                     </div>
                     
                     <form asp-action="Login" method="post">
@@ -56,37 +145,67 @@
                         
                         <div class="mb-3">
                             <label asp-for="Username" class="form-label">
-                                <i class="fas fa-user"></i> Username
+                                <i class="fas fa-user"></i> @GetLocalizedString("Username")
                             </label>
-                            <input asp-for="Username" class="form-control" placeholder="Enter your username" />
+                            <input asp-for="Username" class="form-control" placeholder="@GetLocalizedString("EnterUsername")" />
                             <span asp-validation-for="Username" class="text-danger"></span>
                         </div>
                         
                         <div class="mb-3">
                             <label asp-for="Password" class="form-label">
-                                <i class="fas fa-lock"></i> Password
+                                <i class="fas fa-lock"></i> @GetLocalizedString("Password")
                             </label>
-                            <input asp-for="Password" class="form-control" type="password" placeholder="Enter your password" />
+                            <input asp-for="Password" class="form-control" type="password" placeholder="@GetLocalizedString("EnterPassword")" />
                             <span asp-validation-for="Password" class="text-danger"></span>
                         </div>
                         
                         <div class="mb-3">
                             <label asp-for="Language" class="form-label">
-                                <i class="fas fa-globe"></i> Language
+                                <i class="fas fa-globe"></i> @GetLocalizedString("PreferredLanguage")
                             </label>
                             <select asp-for="Language" class="form-select">
-                                <option value="en">English</option>
-                                <option value="ko">한국어</option>
-                                <option value="zh">中文</option>
+                                @if (currentLanguage == "en")
+                                {
+                                    <option value="en" selected>English</option>
+                                }
+                                else
+                                {
+                                    <option value="en">English</option>
+                                }
+                                
+                                @if (currentLanguage == "ko")
+                                {
+                                    <option value="ko" selected>한국어</option>
+                                }
+                                else
+                                {
+                                    <option value="ko">한국어</option>
+                                }
+                                
+                                @if (currentLanguage == "zh")
+                                {
+                                    <option value="zh" selected>中文</option>
+                                }
+                                else
+                                {
+                                    <option value="zh">中文</option>
+                                }
                             </select>
+                            <div class="form-text">@GetLocalizedString("LanguageWillBeSaved")</div>
                         </div>
                         
                         <div class="d-grid">
                             <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-sign-in-alt"></i> Login
+                                <i class="fas fa-sign-in-alt"></i> @GetLocalizedString("Login")
                             </button>
                         </div>
                     </form>
+                    
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            @GetLocalizedString("DefaultCredentials"): admin / admin123
+                        </small>
+                    </div>
                 </div>
             </div>
         </div>
@@ -94,5 +213,23 @@
     
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // 페이지 상단의 언어 선택기로 즉시 언어 변경
+        document.getElementById('quickLanguageSelector').addEventListener('change', function() {
+            const selectedLang = this.value;
+            
+            // 쿠키 설정
+            document.cookie = `AspNetCore.Culture=c=${selectedLang}|uic=${selectedLang}; path=/; expires=${new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString()}; SameSite=Lax`;
+            
+            // 페이지 새로고침하여 언어 적용
+            window.location.reload();
+        });
+        
+        // 폼의 언어 선택과 상단 선택기 동기화
+        document.querySelector('select[name="Language"]').addEventListener('change', function() {
+            document.getElementById('quickLanguageSelector').value = this.value;
+        });
+    </script>
 </body>
 </html>

@@ -1,12 +1,28 @@
+@using System.Reflection
+@using System.Resources
+@using System.Globalization
 @model SettingsViewModel
 @{
-    ViewData["Title"] = "System Settings";
+    string GetLocalizedString(string key) 
+    {
+        try 
+        {
+            var resourceManager = new ResourceManager("GPIMSWeb.Resources.SharedResource", Assembly.GetExecutingAssembly());
+            return resourceManager.GetString(key, CultureInfo.CurrentUICulture) ?? key;
+        }
+        catch 
+        {
+            return key;
+        }
+    }
+    
+    ViewData["Title"] = GetLocalizedString("Settings");
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="fas fa-cogs"></i> System Settings</h2>
+    <h2><i class="fas fa-cogs"></i> @GetLocalizedString("SystemSettings")</h2>
     <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary">
-        <i class="fas fa-arrow-left"></i> Back to Dashboard
+        <i class="fas fa-arrow-left"></i> @GetLocalizedString("BackToDashboard")
     </a>
 </div>
 
@@ -15,26 +31,26 @@
     <div class="col-md-6 mb-4">
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-server"></i> Equipment Configuration</h5>
+                <h5 class="mb-0"><i class="fas fa-server"></i> @GetLocalizedString("EquipmentConfiguration")</h5>
             </div>
             <div class="card-body">
                 <form id="equipmentForm">
                     <div class="mb-3">
-                        <label class="form-label">Number of Equipment</label>
+                        <label class="form-label">@GetLocalizedString("NumberOfEquipment")</label>
                         <input type="number" id="equipmentCount" class="form-control" 
                                value="@Model.EquipmentCount" min="1" max="32" />
-                        <div class="form-text">Maximum 32 equipment units</div>
+                        <div class="form-text">@GetLocalizedString("MaximumEquipmentUnits")</div>
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label">Channels per Equipment</label>
+                        <label class="form-label">@GetLocalizedString("ChannelsPerEquipment")</label>
                         <input type="number" id="channelsPerEquipment" class="form-control" 
                                value="@Model.ChannelsPerEquipment" min="1" max="64" />
-                        <div class="form-text">Maximum 64 channels per equipment</div>
+                        <div class="form-text">@GetLocalizedString("MaximumChannelsPerEquipment")</div>
                     </div>
                     
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Save Equipment Settings
+                        <i class="fas fa-save"></i> @GetLocalizedString("SaveEquipmentSettings")
                     </button>
                 </form>
             </div>
@@ -45,32 +61,128 @@
     <div class="col-md-6 mb-4">
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-globe"></i> Language Settings</h5>
+                <h5 class="mb-0"><i class="fas fa-globe"></i> @GetLocalizedString("LanguageSettings")</h5>
             </div>
             <div class="card-body">
+                <div class="alert alert-info mb-3">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>@GetLocalizedString("Note"):</strong> @GetLocalizedString("DefaultLanguageNote")
+                </div>
+                
                 <form id="languageForm">
                     <div class="mb-3">
-                        <label class="form-label">Default Language</label>
+                        <label class="form-label">@GetLocalizedString("DefaultLanguage")</label>
                         <select id="defaultLanguage" class="form-select">
-                            <option value="en" selected="@(Model.DefaultLanguage == "en")">English</option>
-                            <option value="ko" selected="@(Model.DefaultLanguage == "ko")">한국어</option>
-                            <option value="zh" selected="@(Model.DefaultLanguage == "zh")">中文</option>
+                            @if (Model.DefaultLanguage == "en")
+                            {
+                                <option value="en" selected>English</option>
+                            }
+                            else
+                            {
+                                <option value="en">English</option>
+                            }
+                            
+                            @if (Model.DefaultLanguage == "ko")
+                            {
+                                <option value="ko" selected>한국어</option>
+                            }
+                            else
+                            {
+                                <option value="ko">한국어</option>
+                            }
+                            
+                            @if (Model.DefaultLanguage == "zh")
+                            {
+                                <option value="zh" selected>中文</option>
+                            }
+                            else
+                            {
+                                <option value="zh">中文</option>
+                            }
                         </select>
+                        <div class="form-text">
+                            @GetLocalizedString("DefaultLanguageDescription")
+                        </div>
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label">Date Format</label>
+                        <label class="form-label">@GetLocalizedString("DateFormat")</label>
                         <select id="dateFormat" class="form-select">
-                            <option value="yyyy-MM-dd HH:mm:ss" selected="@(Model.DateFormat == "yyyy-MM-dd HH:mm:ss")">YYYY-MM-DD HH:mm:ss</option>
-                            <option value="MM/dd/yyyy HH:mm:ss" selected="@(Model.DateFormat == "MM/dd/yyyy HH:mm:ss")">MM/DD/YYYY HH:mm:ss</option>
-                            <option value="dd/MM/yyyy HH:mm:ss" selected="@(Model.DateFormat == "dd/MM/yyyy HH:mm:ss")">DD/MM/YYYY HH:mm:ss</option>
+                            @if (Model.DateFormat == "yyyy-MM-dd HH:mm:ss")
+                            {
+                                <option value="yyyy-MM-dd HH:mm:ss" selected>YYYY-MM-DD HH:mm:ss</option>
+                            }
+                            else
+                            {
+                                <option value="yyyy-MM-dd HH:mm:ss">YYYY-MM-DD HH:mm:ss</option>
+                            }
+                            
+                            @if (Model.DateFormat == "MM/dd/yyyy HH:mm:ss")
+                            {
+                                <option value="MM/dd/yyyy HH:mm:ss" selected>MM/DD/YYYY HH:mm:ss</option>
+                            }
+                            else
+                            {
+                                <option value="MM/dd/yyyy HH:mm:ss">MM/DD/YYYY HH:mm:ss</option>
+                            }
+                            
+                            @if (Model.DateFormat == "dd/MM/yyyy HH:mm:ss")
+                            {
+                                <option value="dd/MM/yyyy HH:mm:ss" selected>DD/MM/YYYY HH:mm:ss</option>
+                            }
+                            else
+                            {
+                                <option value="dd/MM/yyyy HH:mm:ss">DD/MM/YYYY HH:mm:ss</option>
+                            }
                         </select>
                     </div>
                     
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Save Language Settings
+                        <i class="fas fa-save"></i> @GetLocalizedString("SaveLanguageSettings")
                     </button>
                 </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Language Priority Explanation -->
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-question-circle"></i> @GetLocalizedString("LanguagePrioritySystem")</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <div class="badge bg-primary fs-6 mb-2">@GetLocalizedString("FirstPriority")</div>
+                            <h6>@GetLocalizedString("PersonalLanguageChoice")</h6>
+                            <small class="text-muted">
+                                @GetLocalizedString("PersonalLanguageDescription")
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <div class="badge bg-secondary fs-6 mb-2">@GetLocalizedString("SecondPriority")</div>
+                            <h6>@GetLocalizedString("SystemDefaultLanguage")</h6>
+                            <small class="text-muted">
+                                @GetLocalizedString("SystemDefaultDescription")
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <div class="badge bg-light text-dark fs-6 mb-2">@GetLocalizedString("ThirdPriority")</div>
+                            <h6>@GetLocalizedString("SystemFallback")</h6>
+                            <small class="text-muted">
+                                @GetLocalizedString("SystemFallbackDescription")
+                            </small>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -81,24 +193,24 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-info-circle"></i> System Information</h5>
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> @GetLocalizedString("SystemInformation")</h5>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-3">
-                        <strong>Application Version:</strong><br>
+                        <strong>@GetLocalizedString("ApplicationVersion"):</strong><br>
                         <span class="text-muted">1.0.0</span>
                     </div>
                     <div class="col-md-3">
-                        <strong>Database:</strong><br>
+                        <strong>@GetLocalizedString("Database"):</strong><br>
                         <span class="text-muted">SQL Server LocalDB</span>
                     </div>
                     <div class="col-md-3">
-                        <strong>Server Time:</strong><br>
+                        <strong>@GetLocalizedString("ServerTime"):</strong><br>
                         <span class="text-muted">@DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")</span>
                     </div>
                     <div class="col-md-3">
-                        <strong>Environment:</strong><br>
+                        <strong>@GetLocalizedString("Environment"):</strong><br>
                         <span class="text-muted">@Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")</span>
                     </div>
                 </div>
@@ -121,13 +233,13 @@
             })
             .done(function(response) {
                 if (response.success) {
-                    showNotification('Equipment settings saved successfully!', 'success');
+                    showNotification('@GetLocalizedString("EquipmentSettingsSavedSuccessfully")', 'success');
                 } else {
-                    showNotification('Failed to save equipment settings!', 'danger');
+                    showNotification('@GetLocalizedString("FailedToSaveEquipmentSettings")', 'danger');
                 }
             })
             .fail(function() {
-                showNotification('Error saving equipment settings!', 'danger');
+                showNotification('@GetLocalizedString("ErrorSavingEquipmentSettings")', 'danger');
             });
         });
 
@@ -143,13 +255,13 @@
             })
             .done(function(response) {
                 if (response.success) {
-                    showNotification('Language settings saved successfully!', 'success');
+                    showNotification(response.message || '@GetLocalizedString("LanguageSettingsSavedSuccessfully")', 'success');
                 } else {
-                    showNotification('Failed to save language settings!', 'danger');
+                    showNotification(response.message || '@GetLocalizedString("FailedToSaveLanguageSettings")', 'danger');
                 }
             })
             .fail(function() {
-                showNotification('Error saving language settings!', 'danger');
+                showNotification('@GetLocalizedString("ErrorSavingLanguageSettings")', 'danger');
             });
         });
 
@@ -164,7 +276,7 @@
             
             setTimeout(() => {
                 $('.alert').first().fadeOut();
-            }, 3000);
+            }, 5000);
         }
     </script>
 }

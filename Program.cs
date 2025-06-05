@@ -18,10 +18,16 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), sqlOptions =>
     {
-        sqlOptions.CommandTimeout(30); // 명령 타임아웃 설정
-        sqlOptions.EnableRetryOnFailure(3); // 재시도 로직
+        sqlOptions.CommandTimeout(30);
+        sqlOptions.EnableRetryOnFailure(3);
     });
-}, ServiceLifetime.Scoped); // Scoped 명시적 설정
+    // 개발 환경에서만 민감한 데이터 로깅 비활성화
+    if (builder.Environment.IsDevelopment())
+    {
+        options.EnableSensitiveDataLogging(false); // 이 부분을 false로 변경
+        options.EnableDetailedErrors(false); // 이 부분도 false로 변경
+    }
+}, ServiceLifetime.Scoped);
 
 // Authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -39,7 +45,7 @@ builder.Services.AddSignalR();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEquipmentService, EquipmentService>();
 builder.Services.AddSingleton<IRealtimeDataService, RealtimeDataService>();
-builder.Services.AddScoped<IDataSeederService, DataSeederService>(); // 새로 추가
+builder.Services.AddScoped<IDataSeederService, DataSeederService>();
 
 // Localization
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
@@ -96,36 +102,35 @@ app.MapControllerRoute(
 
 app.MapHub<RealtimeDataHub>("/realtimeDataHub");
 
-// 애플리케이션 시작 시 데이터 동기화 (개발 환경에서만)
+// 애플리케이션 시작 시 데이터 동기화 - 백그라운드로 실행
 if (app.Environment.IsDevelopment())
 {
-    using var scope = app.Services.CreateScope();
-    var seederService = scope.ServiceProvider.GetRequiredService<IDataSeederService>();
-    try
+    // 백그라운드에서 실행하여 시작 시간 단축
+    _ = Task.Run(async () =>
     {
-        await seederService.SeedChannelDataAsync();
-        Console.WriteLine("✅ Channel data synchronized on startup");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"❌ Error synchronizing channel data on startup: {ex.Message}");
-    }
+        await Task.Delay(2000); // 2초 후에 실행
+        using var scope = app.Services.CreateScope();
+        var seederService = scope.ServiceProvider.GetRequiredService<IDataSeederService>();
+        try
+        {
+            await seederService.SeedChannelDataAsync();
+            var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+            logger.LogInformation("✅ Channel data synchronized in background");
+        }
+        catch (Exception ex)
+        {
+            var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+            logger.LogError(ex, "❌ Error synchronizing channel data in background");
+        }
+    });
 }
 
-// 개발 환경에서 API 엔드포인트 정보 출력
+// 개발 환경에서 API 엔드포인트 정보 출력 - 간소화
 if (app.Environment.IsDevelopment())
 {
     var logger = app.Services.GetRequiredService<ILogger<Program>>();
     logger.LogInformation("🚀 GPIMSWeb Server Started");
-    logger.LogInformation("📡 SignalR Hub: /realtimeDataHub");
-    logger.LogInformation("🔗 API Endpoints:");
-    logger.LogInformation("   POST /api/ClientData/channel - Channel data");
-    logger.LogInformation("   POST /api/ClientData/canlin - CAN/LIN data");
-    logger.LogInformation("   POST /api/ClientData/aux - AUX sensor data");
-    logger.LogInformation("   POST /api/ClientData/alarm - Alarm data");
-    logger.LogInformation("   GET  /api/ClientData/test - Connection test");
     logger.LogInformation("🌐 Web Interface: https://localhost:7090");
-    logger.LogInformation("👤 Default Login: admin / admin123");
 }
 
 app.Run();

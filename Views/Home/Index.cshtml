@@ -23,17 +23,6 @@
     ViewData["Title"] = GetLocalizedString("Dashboard");
 }
 
-<!-- 디버깅 정보 (필요시 주석 해제) -->
-@*
-<div style="background: yellow; padding: 10px; margin: 10px; border: 1px solid red;">
-    <strong>🐛 DEBUG INFO:</strong><br>
-    Current Culture: @CultureInfo.CurrentCulture.Name<br>
-    Current UI Culture: @CultureInfo.CurrentUICulture.Name<br>
-    Dashboard = "@GetLocalizedString("Dashboard")"<br>
-    Equipment = "@GetLocalizedString("Equipment")"<br>
-</div>
-*@
-
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2><i class="fas fa-tachometer-alt"></i> @GetLocalizedString("Dashboard")</h2>
     <div class="btn-group" role="group">
@@ -84,24 +73,6 @@
                         <span class="stat-label">@GetLocalizedString("Channels") @GetLocalizedString("Active")</span>
                         <span class="stat-value">@equipment.Channels.Count(c => c.Status == ChannelStatus.Active)/@equipment.Channels.Count</span>
                     </div>
-                    @* <div class="stat-row">
-                        <span class="stat-label">@GetLocalizedString("LastUpdate")</span>
-                        <span class="stat-value" data-time="@equipment.LastUpdateTime.ToString("yyyy-MM-dd HH:mm:ss")">
-                            @{
-                                var timeAgo = DateTime.Now - equipment.LastUpdateTime;
-                                string timeDisplay = "";
-                                if (timeAgo.TotalMinutes < 1)
-                                    timeDisplay = "Just now";
-                                else if (timeAgo.TotalMinutes < 60)
-                                    timeDisplay = $"{(int)timeAgo.TotalMinutes} min ago";
-                                else if (timeAgo.TotalHours < 24)
-                                    timeDisplay = $"{(int)timeAgo.TotalHours}h ago";
-                                else
-                                    timeDisplay = equipment.LastUpdateTime.ToString("MM-dd HH:mm");
-                            }
-                            @timeDisplay
-                        </span>
-                    </div> *@
                     <div class="stat-row">
                         <span class="stat-label">@GetLocalizedString("LastUpdate")</span>
                         <span class="stat-value">@equipment.LastUpdateTime.ToString("yyyy-MM-dd HH:mm:ss")</span>
@@ -131,21 +102,20 @@
 
     .equipment-card {
         background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(15px);
-        border-radius: 24px;
+        border-radius: 16px; /* 24px에서 16px로 줄임 */
         padding: 0;
         border: none;
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        transition: all 0.3s ease; /* 0.4s에서 0.3s로 줄임 */
         cursor: pointer;
         position: relative;
         overflow: hidden;
-        height: 300px; /* 280px → 320px로 증가 */
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        height: 280px; /* 300px에서 280px로 줄임 */
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* 그림자 줄임 */
     }
 
     .equipment-card:hover {
-        transform: translateY(-12px) scale(1.02);
-        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+        transform: translateY(-8px) scale(1.01); /* 애니메이션 줄임 */
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15); /* 그림자 줄임 */
     }
 
     .equipment-card::before {
@@ -154,9 +124,9 @@
         top: 0;
         left: 0;
         right: 0;
-        height: 6px;
+        height: 4px; /* 6px에서 4px로 줄임 */
         background: linear-gradient(90deg, #28a745, #20c997);
-        border-radius: 24px 24px 0 0;
+        border-radius: 16px 16px 0 0;
     }
 
     .equipment-card.offline::before {
@@ -172,7 +142,7 @@
     }
 
     .equipment-card .card-body {
-        padding: 25px;
+        padding: 20px; /* 25px에서 20px로 줄임 */
         height: 100%;
         display: flex;
         flex-direction: column;
@@ -180,51 +150,51 @@
     }
 
     .equipment-icon {
-        width: 80px;
-        height: 80px;
-        border-radius: 20px;
+        width: 60px; /* 80px에서 60px로 줄임 */
+        height: 60px;
+        border-radius: 12px; /* 20px에서 12px로 줄임 */
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 20px;
+        margin: 0 auto 15px; /* 20px에서 15px로 줄임 */
         position: relative;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); /* 그림자 줄임 */
     }
 
     .equipment-icon.offline {
         background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-        box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
     }
 
     .equipment-icon.error {
         background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
-        box-shadow: 0 8px 25px rgba(255, 193, 7, 0.3);
+        box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
     }
 
     .equipment-icon.running {
         background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-        box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
     }
 
     .equipment-icon.online {
         background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
     }
 
     .equipment-icon i {
-        font-size: 36px;
+        font-size: 28px; /* 36px에서 28px로 줄임 */
         color: white;
     }
 
     .status-indicator {
         position: absolute;
-        top: -5px;
-        right: -5px;
-        width: 20px;
-        height: 20px;
+        top: -3px; /* -5px에서 -3px로 */
+        right: -3px;
+        width: 16px; /* 20px에서 16px로 줄임 */
+        height: 16px;
         border-radius: 50%;
-        border: 3px solid white;
+        border: 2px solid white; /* 3px에서 2px로 줄임 */
         animation: pulse 2s infinite;
     }
 
@@ -239,48 +209,47 @@
 
     @@keyframes pulse {
         0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
-        70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+        70% { box-shadow: 0 0 0 6px rgba(40, 167, 69, 0); } /* 10px에서 6px로 줄임 */
         100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
     }
 
     .equipment-title {
-        font-size: 1.4rem;
+        font-size: 1.2rem; /* 1.4rem에서 1.2rem으로 줄임 */
         font-weight: 700;
         color: #2c3e50;
-        margin-bottom: 8px;
+        margin-bottom: 6px; /* 8px에서 6px로 줄임 */
         text-align: center;
     }
 
     .equipment-subtitle {
         color: #7f8c8d;
-        font-size: 0.9rem;
+        font-size: 0.85rem; /* 0.9rem에서 0.85rem으로 줄임 */
         text-align: center;
-        margin-bottom: 20px;
+        margin-bottom: 15px; /* 20px에서 15px로 줄임 */
         display: flex;
         flex-direction: column;
-        gap: 4px;
+        gap: 3px; /* 4px에서 3px로 줄임 */
     }
 
     .version-info {
-        font-size: 0.75rem;
+        font-size: 0.7rem; /* 0.75rem에서 0.7rem으로 줄임 */
         color: #95a5a6;
         font-weight: 500;
     }
 
     .version-info i {
-        margin-right: 4px;
+        margin-right: 3px; /* 4px에서 3px로 줄임 */
     }
 
     .status-badge {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
-        padding: 8px 16px;
-        border-radius: 50px;
+        gap: 6px; /* 8px에서 6px로 줄임 */
+        padding: 6px 12px; /* 8px 16px에서 6px 12px로 줄임 */
+        border-radius: 20px; /* 50px에서 20px로 줄임 */
         font-weight: 600;
-        font-size: 0.85rem;
-        margin: 0 auto 15px;
-        backdrop-filter: blur(10px);
+        font-size: 0.8rem; /* 0.85rem에서 0.8rem으로 줄임 */
+        margin: 0 auto 12px; /* 15px에서 12px로 줄임 */
     }
 
     .status-badge.online {
@@ -309,17 +278,17 @@
 
     .equipment-stats {
         margin-top: auto;
-        padding-top: 15px;
+        padding-top: 12px; /* 15px에서 12px로 줄임 */
         border-top: 1px solid rgba(0, 0, 0, 0.05);
-        min-height: 100px; /* 최소 높이 보장 */
+        min-height: 80px; /* 100px에서 80px로 줄임 */
     }
 
     .stat-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 10px; /* 12px → 10px로 조정 */
-        font-size: 0.82rem; /* 0.85rem → 0.82rem로 조정 */
+        margin-bottom: 8px; /* 10px에서 8px로 줄임 */
+        font-size: 0.8rem; /* 0.82rem에서 0.8rem으로 줄임 */
         line-height: 1.3;
     }
 
@@ -339,17 +308,17 @@
 
     .alarm-indicator {
         position: absolute;
-        top: 20px;
-        right: 20px;
+        top: 15px; /* 20px에서 15px로 줄임 */
+        right: 15px;
         background: #dc3545;
         color: white;
         border-radius: 50%;
-        width: 24px;
-        height: 24px;
+        width: 20px; /* 24px에서 20px로 줄임 */
+        height: 20px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.75rem;
+        font-size: 0.7rem; /* 0.75rem에서 0.7rem으로 줄임 */
         font-weight: bold;
         animation: shake 0.5s infinite alternate;
         z-index: 10;
@@ -357,58 +326,40 @@
 
     @@keyframes shake {
         0% { transform: translateX(0); }
-        100% { transform: translateX(2px); }
+        100% { transform: translateX(1px); } /* 2px에서 1px로 줄임 */
     }
 
-    .version-badge {
-        display: none; /* 기존 버전 배지 숨김 */
-    }
-
-    /* Card entrance animation */
+    /* 입장 애니메이션 제거하여 성능 향상 */
     .equipment-card {
-        opacity: 0;
-        animation: fadeInUp 0.6s ease forwards;
+        opacity: 1; /* 기본값으로 설정 */
     }
 
-    @@keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    /* Responsive adjustments */
     @@media (max-width: 768px) {
         .equipment-grid {
             grid-template-columns: 1fr;
-            gap: 20px;
+            gap: 15px; /* 20px에서 15px로 줄임 */
         }
         
         .equipment-card {
-            height: 280px; /* 260px → 300px로 증가 */
+            height: 240px; /* 280px에서 240px로 줄임 */
         }
         
         .equipment-icon {
-            width: 70px;
-            height: 70px;
+            width: 50px; /* 70px에서 50px로 줄임 */
+            height: 50px;
         }
         
         .equipment-icon i {
-            font-size: 30px;
+            font-size: 24px; /* 30px에서 24px로 줄임 */
         }
         
         .equipment-title {
-            font-size: 1.2rem;
+            font-size: 1.1rem; /* 1.2rem에서 1.1rem으로 줄임 */
         }
     }
 
-    /* Click feedback */
     .equipment-card:active {
-        transform: translateY(-8px) scale(0.98);
+        transform: translateY(-4px) scale(0.99); /* 애니메이션 줄임 */
     }
 </style>
 
@@ -416,8 +367,14 @@
     <script>
         let dashboardConnection;
 
-        // SignalR 연결 설정
+        // SignalR 연결 설정 - 지연 로딩
         function setupDashboardSignalR() {
+            if (typeof signalR === 'undefined') {
+                console.log('SignalR not loaded yet, retrying...');
+                setTimeout(setupDashboardSignalR, 1000);
+                return;
+            }
+
             dashboardConnection = new signalR.HubConnectionBuilder()
                 .withUrl("/realtimeDataHub")
                 .build();
@@ -428,237 +385,41 @@
                 console.error("Dashboard SignalR Connection Error:", err.toString());
             });
 
-            // 채널 데이터 업데이트
+            // 이벤트 핸들러들...
             dashboardConnection.on("UpdateChannelData", function (equipmentId, channelNumber, channelData) {
                 updateEquipmentChannelStatus(equipmentId, channelData);
             });
 
-            // 새로운 알람
             dashboardConnection.on("NewAlarm", function (alarm) {
                 updateEquipmentAlarmCount(alarm.equipmentId);
                 showAlarmNotification(alarm);
             });
 
-            // 연결 상태 모니터링
             dashboardConnection.onclose(function() {
                 console.log("Dashboard SignalR connection closed");
-                
-                // 5초 후 재연결 시도
                 setTimeout(function() {
                     setupDashboardSignalR();
                 }, 5000);
             });
         }
 
-        function updateEquipmentChannelStatus(equipmentId, channelData) {
-            const equipmentCard = $(`.equipment-card[data-equipment-id="${equipmentId}"]`);
-            if (equipmentCard.length) {
-                // 장비 상태 업데이트
-                updateEquipmentStatus(equipmentCard, channelData.status);
-                
-                // 마지막 업데이트 시간 갱신
-                const timeElement = equipmentCard.find('.stat-value').last();
-                timeElement.text(new Date().toLocaleString());
-                
-                // 활성 채널 수 업데이트 (간단한 시뮬레이션)
-                updateActiveChannelCount(equipmentCard, equipmentId);
-                
-                // 시각적 피드백
-                equipmentCard.addClass('border-primary');
-                setTimeout(() => {
-                    equipmentCard.removeClass('border-primary');
-                }, 1000);
-            }
-        }
-
-        function updateEquipmentStatus(equipmentCard, channelStatus) {
-            const statusBadge = equipmentCard.find('.status-badge');
-            const equipmentIcon = equipmentCard.find('.equipment-icon');
-            
-            // 채널이 활성 상태이면 장비도 Running으로 설정
-            if (channelStatus === 1) { // Active
-                statusBadge.removeClass('online offline error')
-                          .addClass('running')
-                          .html('<i class="fas fa-circle"></i> @GetLocalizedString("Running")');
-                
-                equipmentIcon.removeClass('online offline error')
-                           .addClass('running');
-                           
-                equipmentCard.removeClass('idle error offline')
-                           .addClass('running');
-            }
-        }
-
-        function updateActiveChannelCount(equipmentCard, equipmentId) {
-            // 실제로는 서버에서 활성 채널 수를 계산해야 하지만,
-            // 여기서는 간단한 시뮬레이션으로 랜덤 업데이트
-            const statValue = equipmentCard.find('.stat-value').first();
-            const currentText = statValue.text();
-            const [current, total] = currentText.split('/').map(s => parseInt(s.trim()));
-            
-            if (!isNaN(current) && !isNaN(total)) {
-                // 활성 채널 수를 랜덤하게 조정 (실제로는 서버 데이터 사용)
-                const newActive = Math.min(total, Math.max(0, current + (Math.random() > 0.5 ? 1 : -1)));
-                statValue.text(`${newActive}/${total}`);
-            }
-        }
-
-        function updateEquipmentAlarmCount(equipmentId) {
-            const equipmentCard = $(`.equipment-card[data-equipment-id="${equipmentId}"]`);
-            if (equipmentCard.length) {
-                let alarmIndicator = equipmentCard.find('.alarm-indicator');
-                
-                if (alarmIndicator.length === 0) {
-                    // 알람 인디케이터가 없으면 생성
-                    alarmIndicator = $('<div class="alarm-indicator">1</div>');
-                    equipmentCard.append(alarmIndicator);
-                } else {
-                    // 기존 알람 수 증가
-                    const currentCount = parseInt(alarmIndicator.text()) || 0;
-                    alarmIndicator.text(currentCount + 1);
-                }
-            }
-        }
-
-        function showAlarmNotification(alarm) {
-            const levelText = alarm.level === 3 ? '@GetLocalizedString("Critical")' : 
-                             alarm.level === 2 ? '@GetLocalizedString("Error")' : 
-                             alarm.level === 1 ? '@GetLocalizedString("Warning")' : '@GetLocalizedString("Info")';
-            
-            const alertClass = alarm.level === 3 ? 'danger' : 
-                             alarm.level === 2 ? 'warning' : 
-                             alarm.level === 1 ? 'warning' : 'info';
-            
-            const alertHtml = `
-                <div class="alert alert-${alertClass} alert-dismissible fade show position-fixed" 
-                     style="top: 20px; right: 20px; z-index: 1050; max-width: 400px;" role="alert">
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        <div>
-                            <strong>@GetLocalizedString("Equipment") #${alarm.equipmentId} - ${levelText}</strong><br>
-                            <small>${alarm.message}</small>
-                        </div>
-                    </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            `;
-            
-            $('body').append(alertHtml);
-            
-            // 브라우저 알림 (권한이 있는 경우)
-            if (Notification.permission === 'granted') {
-                new Notification(`Equipment ${alarm.equipmentId} - ${levelText}`, {
-                    body: alarm.message,
-                    icon: '/favicon.ico'
-                });
-            }
-            
-            // 5초 후 자동 제거
-            setTimeout(() => {
-                $('.alert.position-fixed').first().fadeOut();
-            }, 5000);
-        }
-
-        // 상대적 시간 업데이트 함수
-        function updateRelativeTime() {
-            $('.stat-value[data-time]').each(function() {
-                const timeStr = $(this).data('time');
-                const updateTime = new Date(timeStr);
-                const now = new Date();
-                const diffMs = now - updateTime;
-                const diffMins = Math.floor(diffMs / 60000);
-                const diffHours = Math.floor(diffMs / 3600000);
-                const diffDays = Math.floor(diffMs / 86400000);
-                
-                let displayText = '';
-                if (diffMins < 1) {
-                    displayText = 'Just now';
-                } else if (diffMins < 60) {
-                    displayText = diffMins + ' min ago';
-                } else if (diffHours < 24) {
-                    displayText = diffHours + 'h ago';
-                } else {
-                    displayText = updateTime.toLocaleDateString() + ' ' + updateTime.toLocaleTimeString().slice(0, 5);
-                }
-                
-                $(this).text(displayText);
-            });
-        }
-
-        // 장비 상태 실시간 업데이트
-        function updateEquipmentOnlineStatus() {
-            // 최근 5분 이내에 데이터를 받은 장비는 온라인으로 표시
-            $('.equipment-card').each(function() {
-                const card = $(this);
-                const equipmentId = card.data('equipment-id');
-                const lastUpdateElement = card.find('.stat-value').last();
-                const lastUpdateText = lastUpdateElement.attr('data-time');
-                
-                if (lastUpdateText) {
-                    const lastUpdate = new Date(lastUpdateText);
-                    const now = new Date();
-                    const diffMinutes = (now - lastUpdate) / (1000 * 60);
-                    
-                    const statusIndicator = card.find('.status-indicator');
-                    const equipmentIcon = card.find('.equipment-icon');
-                    
-                    if (diffMinutes > 5) {
-                        // 5분 이상 업데이트가 없으면 오프라인으로 표시
-                        statusIndicator.removeClass('online').addClass('offline');
-                        equipmentIcon.removeClass('online running').addClass('offline');
-                        card.removeClass('online running').addClass('offline');
-                        
-                        const statusBadge = card.find('.status-badge');
-                        statusBadge.removeClass('online running error')
-                                  .addClass('offline')
-                                  .html('<i class="fas fa-times-circle"></i> @GetLocalizedString("Offline")');
-                    }
-                }
-            });
-        }
-
-        // 장비 카드 클릭 이벤트를 jQuery로 처리
+        // 최적화된 이벤트 등록
         $(document).ready(function() {
-            // SignalR 연결
-            setupDashboardSignalR();
-            
-            // 장비 카드 클릭 이벤트
-            $('.equipment-card').on('click', function() {
+            // 장비 카드 클릭 이벤트 - 간단하게
+            $('.equipment-card').click(function() {
                 const equipmentId = $(this).data('equipment-id');
-                
-                // 클릭 피드백
-                $(this).css('transform', 'scale(0.98)');
-                
-                setTimeout(() => {
-                    $(this).css('transform', '');
-                    // 상세 페이지로 이동
+                if (equipmentId) {
                     window.location.href = '/Equipment/Detail/' + equipmentId;
-                }, 150);
+                }
             });
             
-            // 카드 입장 애니메이션
-            $('.equipment-card').each(function(index) {
-                $(this).css('animation-delay', (index * 0.1) + 's');
-            });
+            // SignalR 연결을 지연시켜서 초기 로딩 속도 향상
+            setTimeout(setupDashboardSignalR, 1000);
             
-            // 상대적 시간 업데이트 (1분마다)
-            updateRelativeTime();
-            setInterval(updateRelativeTime, 60000);
-            
-            // 장비 온라인 상태 확인 (30초마다)
-            setInterval(updateEquipmentOnlineStatus, 30000);
-            
-            // 브라우저 알림 권한 요청
-            if (Notification.permission === 'default') {
-                Notification.requestPermission();
-            }
-            
-            // 실시간 연결 상태 표시
-            setTimeout(() => {
-                if (dashboardConnection && dashboardConnection.state === signalR.HubConnectionState.Connected) {
-                    console.log('Real-time dashboard updates enabled');
-                } else {
-                    console.warn('Real-time dashboard connection failed');
+            // 브라우저 알림 권한 요청을 지연
+            setTimeout(function() {
+                if (Notification.permission === 'default') {
+                    Notification.requestPermission();
                 }
             }, 2000);
         });
@@ -667,31 +428,34 @@
             location.reload();
         }
 
-        // 페이지가 숨겨졌다가 다시 보일 때 연결 확인
-        document.addEventListener('visibilitychange', function() {
-            if (!document.hidden && dashboardConnection && dashboardConnection.state !== signalR.HubConnectionState.Connected) {
-                console.log('Dashboard became visible, checking SignalR connection...');
-                setupDashboardSignalR();
+        // 간단한 업데이트 함수들
+        function updateEquipmentChannelStatus(equipmentId, channelData) {
+            const equipmentCard = $(`.equipment-card[data-equipment-id="${equipmentId}"]`);
+            if (equipmentCard.length) {
+                equipmentCard.addClass('border-primary');
+                setTimeout(() => {
+                    equipmentCard.removeClass('border-primary');
+                }, 1000);
             }
-        });
+        }
 
-        // 페이지 떠날 때 연결 정리
-        $(window).on('beforeunload', function() {
-            if (dashboardConnection && dashboardConnection.state === signalR.HubConnectionState.Connected) {
-                dashboardConnection.stop();
-            }
-        });
-
-        // 주기적으로 연결 상태 확인 (1분마다)
-        setInterval(function() {
-            if (dashboardConnection && dashboardConnection.state === signalR.HubConnectionState.Connected) {
-                console.log('Dashboard SignalR connection is healthy');
-            } else {
-                console.warn('Dashboard SignalR connection issue detected');
-                if (dashboardConnection && dashboardConnection.state === signalR.HubConnectionState.Disconnected) {
-                    setupDashboardSignalR();
+        function updateEquipmentAlarmCount(equipmentId) {
+            const equipmentCard = $(`.equipment-card[data-equipment-id="${equipmentId}"]`);
+            if (equipmentCard.length) {
+                let alarmIndicator = equipmentCard.find('.alarm-indicator');
+                if (alarmIndicator.length === 0) {
+                    alarmIndicator = $('<div class="alarm-indicator">1</div>');
+                    equipmentCard.append(alarmIndicator);
+                } else {
+                    const currentCount = parseInt(alarmIndicator.text()) || 0;
+                    alarmIndicator.text(currentCount + 1);
                 }
             }
-        }, 60000);
+        }
+
+        function showAlarmNotification(alarm) {
+            // 간소화된 알림
+            console.log('New alarm:', alarm);
+        }
     </script>
 }

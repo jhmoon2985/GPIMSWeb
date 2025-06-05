@@ -13,9 +13,15 @@ builder.Services.AddControllersWithViews()
     .AddViewLocalization()
     .AddDataAnnotationsLocalization();
 
-// Entity Framework
+// Entity Framework with optimized settings
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), sqlOptions =>
+    {
+        sqlOptions.CommandTimeout(30); // 명령 타임아웃 설정
+        sqlOptions.EnableRetryOnFailure(3); // 재시도 로직
+    });
+}, ServiceLifetime.Scoped); // Scoped 명시적 설정
 
 // Authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -65,6 +71,14 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+else
+{
+    // 개발 환경에서 CORS 허용 (클라이언트 테스트용)
+    app.UseCors(policy => policy
+        .AllowAnyOrigin()
+        .AllowAnyMethod()
+        .AllowAnyHeader());
+}
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
@@ -96,6 +110,22 @@ if (app.Environment.IsDevelopment())
     {
         Console.WriteLine($"❌ Error synchronizing channel data on startup: {ex.Message}");
     }
+}
+
+// 개발 환경에서 API 엔드포인트 정보 출력
+if (app.Environment.IsDevelopment())
+{
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    logger.LogInformation("🚀 GPIMSWeb Server Started");
+    logger.LogInformation("📡 SignalR Hub: /realtimeDataHub");
+    logger.LogInformation("🔗 API Endpoints:");
+    logger.LogInformation("   POST /api/ClientData/channel - Channel data");
+    logger.LogInformation("   POST /api/ClientData/canlin - CAN/LIN data");
+    logger.LogInformation("   POST /api/ClientData/aux - AUX sensor data");
+    logger.LogInformation("   POST /api/ClientData/alarm - Alarm data");
+    logger.LogInformation("   GET  /api/ClientData/test - Connection test");
+    logger.LogInformation("🌐 Web Interface: https://localhost:7090");
+    logger.LogInformation("👤 Default Login: admin / admin123");
 }
 
 app.Run();

@@ -428,36 +428,57 @@
                 .build();
 
             connection.start().then(function () {
-                console.log("SignalR Connected");
+                console.log("SignalR Connected for Equipment Detail");
                 connection.invoke("JoinEquipmentGroup", equipmentId.toString());
             }).catch(function (err) {
-                console.error(err.toString());
+                console.error("SignalR Connection Error:", err.toString());
+                showNotification("Real-time connection failed", "warning");
             });
 
-            // 채널 데이터 업데이트
-            connection.on("UpdateChannelData", function (channelNumber, channelData) {
-                updateChannelRow(channelNumber, channelData);
+            // 전체 채널 데이터 업데이트 (장비별)
+            connection.on("UpdateChannelData", function (updateEquipmentId, channelNumber, channelData) {
+                if (updateEquipmentId === equipmentId) {
+                    updateChannelRow(channelNumber, channelData);
+                }
             });
 
-            // CAN/LIN 데이터 업데이트
-            connection.on("UpdateCanLinData", function (name, canLinData) {
-                updateCanLinRow(name, canLinData);
+            // CAN/LIN 데이터 업데이트 (장비별)
+            connection.on("UpdateCanLinData", function (updateEquipmentId, name, canLinData) {
+                if (updateEquipmentId === equipmentId) {
+                    updateCanLinRow(name, canLinData);
+                }
             });
 
-            // AUX 데이터 업데이트
-            connection.on("UpdateAuxData", function (sensorId, auxData) {
-                updateAuxData(sensorId, auxData);
+            // AUX 데이터 업데이트 (장비별)
+            connection.on("UpdateAuxData", function (updateEquipmentId, sensorId, auxData) {
+                if (updateEquipmentId === equipmentId) {
+                    updateAuxData(sensorId, auxData);
+                }
             });
 
             // 새로운 알람
             connection.on("NewAlarm", function (alarm) {
-                addNewAlarm(alarm);
+                if (alarm.equipmentId === equipmentId) {
+                    addNewAlarm(alarm);
+                }
+            });
+
+            // 연결 상태 모니터링
+            connection.onclose(function() {
+                console.log("SignalR connection closed");
+                showNotification("Real-time connection lost. Attempting to reconnect...", "warning");
+                
+                // 5초 후 재연결 시도
+                setTimeout(function() {
+                    setupSignalR();
+                }, 5000);
             });
         }
 
         function updateChannelRow(channelNumber, data) {
             const row = $(`tr[data-channel="${channelNumber}"]`);
             if (row.length) {
+                // 숫자 값들 업데이트
                 row.find('.voltage').text(data.voltage.toFixed(2));
                 row.find('.current').text(data.current.toFixed(2));
                 row.find('.capacity').text(data.capacity.toFixed(1));
@@ -466,26 +487,77 @@
                 
                 // 상태 배지 업데이트
                 const statusBadge = row.find('.badge');
-                statusBadge.removeClass('bg-success bg-danger bg-secondary');
-                if (data.status === 1) { // Active
-                    statusBadge.addClass('bg-success').text('@GetLocalizedString("Active")');
-                } else if (data.status === 2) { // Error
-                    statusBadge.addClass('bg-danger').text('@GetLocalizedString("Error")');
-                } else {
-                    statusBadge.addClass('bg-secondary').text('@GetLocalizedString("Idle")');
+                statusBadge.removeClass('bg-success bg-danger bg-secondary bg-warning');
+                
+                let statusText = '';
+                let statusClass = '';
+                
+                switch (data.status) {
+                    case 0: // Idle
+                        statusText = '@GetLocalizedString("Idle")';
+                        statusClass = 'bg-secondary';
+                        break;
+                    case 1: // Active
+                        statusText = '@GetLocalizedString("Active")';
+                        statusClass = 'bg-success';
+                        break;
+                    case 2: // Error
+                        statusText = '@GetLocalizedString("Error")';
+                        statusClass = 'bg-danger';
+                        break;
+                    case 3: // Pause
+                        statusText = '@GetLocalizedString("Pause")';
+                        statusClass = 'bg-warning';
+                        break;
+                    default:
+                        statusText = 'Unknown';
+                        statusClass = 'bg-secondary';
                 }
                 
-                // 행 강조 효과
+                statusBadge.addClass(statusClass).text(statusText);
+                
+                // 모드 업데이트
+                const modeCell = row.find('td:nth-child(3)'); // Mode column
+                let modeText = '';
+                switch (data.mode) {
+                    case 0: modeText = '@GetLocalizedString("Rest")'; break;
+                    case 1: modeText = '@GetLocalizedString("Charge")'; break;
+                    case 2: modeText = '@GetLocalizedString("Discharge")'; break;
+                    case 3: modeText = '@GetLocalizedString("CV")'; break;
+                    case 4: modeText = '@GetLocalizedString("CC")'; break;
+                    default: modeText = 'Unknown';
+                }
+                modeCell.text(modeText);
+                
+                // 스케줄 이름 업데이트
+                const scheduleCell = row.find('td:last-child');
+                scheduleCell.text(data.scheduleName || '-');
+                
+                // 시각적 피드백 - 업데이트된 행 강조
                 row.addClass('table-info');
                 setTimeout(() => {
                     row.removeClass('table-info');
                 }, 1000);
+                
+                // 애니메이션 효과
+                row.css('background-color', '#d4edda');
+                setTimeout(() => {
+                    row.css('background-color', '');
+                }, 500);
+                
+                console.log(`Channel ${channelNumber} updated:`, data);
             }
         }
 
         function updateCanLinRow(name, data) {
-            const row = $(`#canlinTableBody tr[data-name="${name}"]`);
+            // CAN/LIN 데이터를 이름으로 찾아서 업데이트
+            const row = $(`#canlinTableBody tr`).filter(function() {
+                return $(this).find('td:first').text().trim() === name;
+            });
+            
             if (row.length) {
+                row.find('td:nth-child(2)').text(data.minValue.toFixed(2));
+                row.find('td:nth-child(3)').text(data.maxValue.toFixed(2));
                 row.find('.current-value').text(data.currentValue.toFixed(2));
                 
                 // 업데이트 강조 효과
@@ -493,13 +565,62 @@
                 setTimeout(() => {
                     row.find('.current-value').removeClass('text-warning').addClass('text-primary');
                 }, 500);
+                
+                console.log(`CAN/LIN ${name} updated:`, data);
+            } else {
+                // 새로운 CAN/LIN 데이터가 추가된 경우
+                addNewCanLinRow(name, data);
+            }
+        }
+
+        function addNewCanLinRow(name, data) {
+            const newRow = `
+                <tr data-name="${name}" data-channel="all">
+                    <td class="fw-bold">${name}</td>
+                    <td>${data.minValue.toFixed(2)}</td>
+                    <td>${data.maxValue.toFixed(2)}</td>
+                    <td class="current-value text-primary fw-bold">${data.currentValue.toFixed(2)}</td>
+                </tr>
+            `;
+            
+            if ($('#canlinTableBody').length === 0) {
+                // 테이블이 없으면 생성
+                const tableHtml = `
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>@GetLocalizedString("Name")</th>
+                                    <th>@GetLocalizedString("MinValue")</th>
+                                    <th>@GetLocalizedString("MaxValue")</th>
+                                    <th>@GetLocalizedString("CurrentValue")</th>
+                                </tr>
+                            </thead>
+                            <tbody id="canlinTableBody">
+                                ${newRow}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                $('#canLinDataContent').html(tableHtml);
+                $('#noCanLinData').hide();
+            } else {
+                $('#canlinTableBody').append(newRow);
             }
         }
 
         function updateAuxData(sensorId, data) {
             const element = $(`[data-aux="${sensorId}"]`);
             if (element.length) {
-                const unit = data.type === 1 ? '°C' : data.type === 0 ? 'V' : 'Ω';
+                // 타입에 따른 단위 설정
+                let unit = '';
+                switch (data.type) {
+                    case 0: unit = 'V'; break;  // Voltage
+                    case 1: unit = '°C'; break; // Temperature
+                    case 2: unit = 'Ω'; break;  // NTC
+                    default: unit = '';
+                }
+                
                 element.text(data.value.toFixed(1) + unit);
                 
                 // 업데이트 강조 효과
@@ -507,40 +628,124 @@
                 setTimeout(() => {
                     element.removeClass('text-warning').addClass('text-primary');
                 }, 500);
+                
+                // 타임스탬프 업데이트
+                const timestampElement = element.closest('.card-body').find('small:last');
+                timestampElement.text(new Date().toLocaleTimeString());
+                
+                console.log(`AUX ${sensorId} (${data.name}) updated:`, data);
+            } else {
+                // 새로운 AUX 센서가 추가된 경우
+                addNewAuxSensor(sensorId, data);
+            }
+        }
+
+        function addNewAuxSensor(sensorId, data) {
+            let unit = '';
+            let iconClass = '';
+            
+            switch (data.type) {
+                case 0: // Voltage
+                    unit = 'V';
+                    iconClass = 'bolt text-primary';
+                    break;
+                case 1: // Temperature
+                    unit = '°C';
+                    iconClass = 'thermometer-half text-warning';
+                    break;
+                case 2: // NTC
+                    unit = 'Ω';
+                    iconClass = 'microchip text-info';
+                    break;
+                default:
+                    unit = '';
+                    iconClass = 'question text-muted';
+            }
+            
+            const newSensor = `
+                <div class="col-md-6 mb-3" data-channel="all">
+                    <div class="card bg-light border-0">
+                        <div class="card-body text-center p-3">
+                            <i class="fas fa-${iconClass} fa-lg mb-2"></i>
+                            <div class="small fw-bold">${data.name}</div>
+                            <div class="h5 text-primary mb-1" data-aux="${sensorId}">
+                                ${data.value.toFixed(1)}${unit}
+                            </div>
+                            <small class="text-muted">${new Date().toLocaleTimeString()}</small>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            if ($('#auxSensorGrid').length === 0) {
+                // 그리드가 없으면 생성
+                const gridHtml = `<div class="row" id="auxSensorGrid">${newSensor}</div>`;
+                $('#auxDataContent').html(gridHtml);
+                $('#noAuxData').hide();
+            } else {
+                $('#auxSensorGrid').append(newSensor);
             }
         }
 
         function addNewAlarm(alarm) {
-            if (alarm.equipmentId === equipmentId) {
-                const alertClass = alarm.level === 3 ? 'danger' : alarm.level === 2 ? 'warning' : 'info';
-                const levelText = alarm.level === 3 ? '@GetLocalizedString("Critical")' : 
-                                 alarm.level === 2 ? '@GetLocalizedString("Error")' : 
-                                 alarm.level === 1 ? '@GetLocalizedString("Warning")' : '@GetLocalizedString("Info")';
-                
-                const alarmHtml = `
-                    <div class="alert alert-${alertClass} alert-sm mb-2" data-alarm="${alarm.id}">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <div class="fw-bold">${levelText}</div>
-                                <div class="small">${alarm.message}</div>
-                                <div class="text-muted small">${new Date(alarm.createdAt).toLocaleString()}</div>
-                            </div>
-                            <button class="btn btn-sm btn-outline-danger ms-2" onclick="clearAlarm(${alarm.id})">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-                
-                $('#alarmsContainer').prepend(alarmHtml);
-                updateAlarmBadge();
-                
-                // 알람 카드 강조
-                $('.card:has(#alarmsContainer)').addClass('border-danger');
-                setTimeout(() => {
-                    $('.card:has(#alarmsContainer)').removeClass('border-danger');
-                }, 3000);
+            let alertClass = '';
+            let levelText = '';
+            
+            switch (alarm.level) {
+                case 0: // Info
+                    alertClass = 'info';
+                    levelText = '@GetLocalizedString("Info")';
+                    break;
+                case 1: // Warning
+                    alertClass = 'warning';
+                    levelText = '@GetLocalizedString("Warning")';
+                    break;
+                case 2: // Error
+                    alertClass = 'warning'; // Bootstrap doesn't have alert-error
+                    levelText = '@GetLocalizedString("Error")';
+                    break;
+                case 3: // Critical
+                    alertClass = 'danger';
+                    levelText = '@GetLocalizedString("Critical")';
+                    break;
+                default:
+                    alertClass = 'info';
+                    levelText = 'Unknown';
             }
+            
+            const alarmHtml = `
+                <div class="alert alert-${alertClass} alert-sm mb-2" data-alarm="${alarm.id}">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <div class="fw-bold">${levelText}</div>
+                            <div class="small">${alarm.message}</div>
+                            <div class="text-muted small">${new Date(alarm.createdAt).toLocaleString()}</div>
+                        </div>
+                        <button class="btn btn-sm btn-outline-danger ms-2" onclick="clearAlarm(${alarm.id})">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            $('#alarmsContainer').prepend(alarmHtml);
+            updateAlarmBadge();
+            
+            // 알람 카드 강조
+            $('.card:has(#alarmsContainer)').addClass('border-danger');
+            setTimeout(() => {
+                $('.card:has(#alarmsContainer)').removeClass('border-danger');
+            }, 3000);
+            
+            // 브라우저 알림 (권한이 있는 경우)
+            if (Notification.permission === 'granted') {
+                new Notification(`Equipment ${alarm.equipmentId} - ${levelText}`, {
+                    body: alarm.message,
+                    icon: '/favicon.ico'
+                });
+            }
+            
+            console.log('New alarm received:', alarm);
         }
 
         function clearAlarm(alarmId) {
@@ -551,6 +756,7 @@
                             $(this).remove();
                             updateAlarmBadge();
                         });
+                        showNotification('Alarm cleared successfully', 'success');
                     } else {
                         showNotification('@GetLocalizedString("FailedToClearAlarm")', 'danger');
                     }
@@ -580,22 +786,18 @@
             }
         }
 
-        // 채널 선택 관련 변수
+        // 기존 채널 선택 관련 함수들...
         let selectedChannels = [];
         let lastSelectedChannel = null;
 
-        // 채널 선택 함수 (행 클릭)
         function selectChannel(event, channelNumber) {
             event.preventDefault();
             
             if (event.shiftKey && lastSelectedChannel !== null) {
-                // Shift 키를 누른 상태에서 범위 선택
                 selectChannelRange(lastSelectedChannel, channelNumber);
             } else if (event.ctrlKey || event.metaKey) {
-                // Ctrl 키를 누른 상태에서 다중 선택
                 toggleChannelSelection(channelNumber);
             } else {
-                // 일반 선택 (기존 선택 해제)
                 selectedChannels = [channelNumber];
                 lastSelectedChannel = channelNumber;
                 updateChannelDisplay();
@@ -739,7 +941,7 @@
                 { name: `CH${channelNum} NTC`, type: 'NTC', value: (1000 + channelNum * 50).toFixed(0), unit: 'Ω', icon: 'microchip text-info' }
             ];
             
-            let auxHtml = '<div class="row">';
+            let auxHtml = '<div class="row" id="auxSensorGrid">';
             auxSensors.forEach(sensor => {
                 auxHtml += `
                     <div class="col-md-6 mb-3">
@@ -767,7 +969,8 @@
         function showAllAuxData() {
             // 원래 모든 AUX 데이터 표시
             $('#auxSensorGrid > div').show();
-        }         
+        }
+
         // 채널 액션 함수들
         function startSelectedChannels() {
             if (selectedChannels.length === 0) {
@@ -891,7 +1094,8 @@
 
         function showNotification(message, type) {
             const alertHtml = `
-                <div class="alert alert-${type} alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 1050;" role="alert">
+                <div class="alert alert-${type} alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 1050; max-width: 350px;" role="alert">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
                     ${message}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
@@ -900,7 +1104,7 @@
             
             setTimeout(() => {
                 $('.alert.position-fixed').fadeOut();
-            }, 3000);
+            }, 5000);
         }
 
         // 이벤트 리스너 추가
@@ -918,21 +1122,45 @@
             // 초기 상태 설정
             updateChannelDisplay();
             
-            // 도움말 표시
-            showNotification('Tip: Click to select, Ctrl+Click for multiple, Shift+Click for range selection', 'info');
+            // 브라우저 알림 권한 요청
+            if (Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
             
-            // 주기적으로 데이터 새로고침 (30초마다)
+            // 연결 상태 표시
+            showNotification('Connecting to real-time data...', 'info');
+            
+            // 도움말 표시
+            setTimeout(() => {
+                showNotification('Tip: Click to select, Ctrl+Click for multiple, Shift+Click for range selection', 'info');
+            }, 2000);
+            
+            // 주기적으로 연결 상태 확인 (30초마다)
             setInterval(function() {
-                // 실제 운영에서는 SignalR로 실시간 업데이트를 받지만,
-                // 백업으로 주기적 새로고침도 설정
-                console.log('Auto refresh check...');
+                if (connection && connection.state === signalR.HubConnectionState.Connected) {
+                    console.log('SignalR connection is healthy');
+                } else {
+                    console.warn('SignalR connection issue detected');
+                    showNotification('Connection issue detected. Attempting to reconnect...', 'warning');
+                    if (connection && connection.state === signalR.HubConnectionState.Disconnected) {
+                        setupSignalR();
+                    }
+                }
             }, 30000);
         });
 
         // 페이지 떠날 때 그룹에서 나가기
         $(window).on('beforeunload', function() {
-            if (connection) {
+            if (connection && connection.state === signalR.HubConnectionState.Connected) {
                 connection.invoke("LeaveEquipmentGroup", equipmentId.toString());
+            }
+        });
+
+        // 페이지가 숨겨졌다가 다시 보일 때 연결 확인
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden && connection && connection.state !== signalR.HubConnectionState.Connected) {
+                console.log('Page became visible, checking SignalR connection...');
+                setupSignalR();
             }
         });
     </script>

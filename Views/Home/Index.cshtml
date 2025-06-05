@@ -84,7 +84,7 @@
                         <span class="stat-label">@GetLocalizedString("Channels") @GetLocalizedString("Active")</span>
                         <span class="stat-value">@equipment.Channels.Count(c => c.Status == ChannelStatus.Active)/@equipment.Channels.Count</span>
                     </div>
-                    <div class="stat-row">
+                    @* <div class="stat-row">
                         <span class="stat-label">@GetLocalizedString("LastUpdate")</span>
                         <span class="stat-value" data-time="@equipment.LastUpdateTime.ToString("yyyy-MM-dd HH:mm:ss")">
                             @{
@@ -101,11 +101,11 @@
                             }
                             @timeDisplay
                         </span>
-                    </div>
-                    @* <div class="stat-row">
+                    </div> *@
+                    <div class="stat-row">
                         <span class="stat-label">@GetLocalizedString("LastUpdate")</span>
                         <span class="stat-value">@equipment.LastUpdateTime.ToString("yyyy-MM-dd HH:mm:ss")</span>
-                    </div> *@
+                    </div>
                 </div>
             </div>
         </div>

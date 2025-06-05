@@ -21,79 +21,220 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2><i class="fas fa-download"></i> @GetLocalizedString("EquipmentProgramUpdate")</h2>
-    <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary">
-        <i class="fas fa-arrow-left"></i> @GetLocalizedString("BackToDashboard")
-    </a>
+    <div class="btn-group">
+        <button type="button" class="btn btn-outline-primary" onclick="selectUpdateFile()">
+            <i class="fas fa-file-upload"></i> Select Update File
+        </button>
+        <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> @GetLocalizedString("BackToDashboard")
+        </a>
+    </div>
 </div>
 
-<div class="row">
-    @foreach (var equipment in Model)
-    {
-        <div class="col-lg-6 col-md-12 mb-4">
-            <div class="card @(equipment.IsOnline ? "border-success" : "border-danger")">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
-                        <i class="fas fa-server"></i> @equipment.Name
-                    </h5>
-                    <span class="badge @(equipment.IsOnline ? "bg-success" : "bg-danger")">
-                        @GetLocalizedString(equipment.IsOnline ? "Online" : "Offline")
-                    </span>
+<!-- Update File Selection -->
+<div class="card mb-4" id="fileSelectionCard" style="display: none;">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-file-archive"></i> Update File Selection</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-8">
+                <input type="file" id="updateFileInput" class="form-control" accept=".zip,.tar,.gz,.bin,.hex,.fw" />
+                <div class="form-text">
+                    Supported formats: ZIP, TAR, GZ, BIN, HEX, FW files
                 </div>
-                <div class="card-body">
-                    <div class="row mb-3">
-                        <div class="col-6">
-                            <small class="text-muted">@GetLocalizedString("CurrentVersion"):</small><br>
-                            <strong>@equipment.Version</strong>
-                        </div>
-                        <div class="col-6">
-                            <small class="text-muted">@GetLocalizedString("Status"):</small><br>
-                            <span class="badge bg-@(equipment.Status == EquipmentStatus.Idle ? "secondary" : 
-                                equipment.Status == EquipmentStatus.Running ? "primary" : 
-                                equipment.Status == EquipmentStatus.Error ? "danger" : "warning")">
-                                @GetLocalizedString(equipment.Status.ToString())
-                            </span>
-                        </div>
+            </div>
+            <div class="col-md-4">
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-success" onclick="loadUpdateFile()" id="loadFileBtn" disabled>
+                        <i class="fas fa-upload"></i> Load Update File
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="cancelFileSelection()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- File Information Display -->
+        <div id="fileInfoDisplay" class="mt-3" style="display: none;">
+            <div class="alert alert-info">
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong>File Name:</strong><br>
+                        <span id="fileName" class="text-muted"></span>
                     </div>
-                    
-                    <div class="row mb-3">
-                        <div class="col-12">
-                            <small class="text-muted">@GetLocalizedString("LastUpdate"):</small><br>
-                            @equipment.LastUpdateTime.ToString("yyyy-MM-dd HH:mm:ss")
-                        </div>
+                    <div class="col-md-2">
+                        <strong>File Size:</strong><br>
+                        <span id="fileSize" class="text-muted"></span>
                     </div>
-
-                    <div class="progress mb-3" id="progress-@equipment.Id" style="display: none;">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                             role="progressbar" style="width: 0%">
-                            <span class="progress-text">0%</span>
-                        </div>
+                    <div class="col-md-3">
+                        <strong>Version:</strong><br>
+                        <span id="fileVersion" class="text-muted">v2.2.0</span>
                     </div>
-
-                    <div class="d-grid">
-                        @if (equipment.IsOnline && equipment.Status == EquipmentStatus.Idle)
-                        {
-                            <button class="btn btn-primary" onclick="updateEquipment(@equipment.Id)" 
-                                    id="update-btn-@equipment.Id">
-                                <i class="fas fa-download"></i> @GetLocalizedString("UpdateToVersion") v2.2.0
-                            </button>
-                        }
-                        else if (!equipment.IsOnline)
-                        {
-                            <button class="btn btn-secondary" disabled>
-                                <i class="fas fa-exclamation-triangle"></i> @GetLocalizedString("EquipmentOffline")
-                            </button>
-                        }
-                        else
-                        {
-                            <button class="btn btn-warning" disabled>
-                                <i class="fas fa-clock"></i> @GetLocalizedString("EquipmentBusy")
-                            </button>
-                        }
+                    <div class="col-md-4">
+                        <strong>Compatible Equipment:</strong><br>
+                        <span id="compatibleEquipment" class="text-muted">All GPIMS Models</span>
                     </div>
                 </div>
             </div>
         </div>
-    }
+    </div>
+</div>
+
+<!-- Equipment List -->
+<div class="card">
+    <div class="card-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h5 class="mb-0"><i class="fas fa-server"></i> Equipment List</h5>
+            </div>
+            <div class="col-auto">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="selectAllEquipment">
+                    <label class="form-check-label" for="selectAllEquipment">
+                        Select All Ready Equipment
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th width="50">
+                            <input type="checkbox" id="masterCheckbox" class="form-check-input">
+                        </th>
+                        <th width="100">@GetLocalizedString("Equipment")</th>
+                        <th width="100">@GetLocalizedString("Status")</th>
+                        <th width="120">@GetLocalizedString("CurrentVersion")</th>
+                        <th width="150">@GetLocalizedString("LastUpdate")</th>
+                        <th width="200">Update Progress</th>
+                        <th width="150">@GetLocalizedString("Actions")</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var equipment in Model)
+                    {
+                        <tr id="equipment-row-@equipment.Id" class="@(equipment.IsOnline && equipment.Status == EquipmentStatus.Idle ? "table-light" : "table-secondary")">
+                            <td>
+                                @if (equipment.IsOnline && equipment.Status == EquipmentStatus.Idle)
+                                {
+                                    <input type="checkbox" class="form-check-input equipment-checkbox" value="@equipment.Id">
+                                }
+                                else
+                                {
+                                    <input type="checkbox" class="form-check-input" disabled>
+                                }
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-circle me-2 @(equipment.IsOnline ? "text-success" : "text-danger")"></i>
+                                    <div>
+                                        <div class="fw-bold">@equipment.Name</div>
+                                        <small class="text-muted">@GetLocalizedString(equipment.IsOnline ? "Online" : "Offline")</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-@(equipment.Status == EquipmentStatus.Idle ? "success" : 
+                                    equipment.Status == EquipmentStatus.Running ? "primary" : 
+                                    equipment.Status == EquipmentStatus.Error ? "danger" : "warning") fs-6">
+                                    @GetLocalizedString(equipment.Status.ToString())
+                                </span>
+                            </td>
+                            <td>
+                                <div class="fw-bold">@equipment.Version</div>
+                                @if (equipment.Version != "v2.2.0")
+                                {
+                                    <small class="text-warning">
+                                        <i class="fas fa-arrow-up"></i> Update Available
+                                    </small>
+                                }
+                                else
+                                {
+                                    <small class="text-success">
+                                        <i class="fas fa-check"></i> Latest
+                                    </small>
+                                }
+                            </td>
+                            <td>
+                                <div>@equipment.LastUpdateTime.ToString("MM-dd HH:mm")</div>
+                                <small class="text-muted">@equipment.LastUpdateTime.ToString("yyyy")</small>
+                            </td>
+                            <td>
+                                <!-- Progress Bar -->
+                                <div class="progress" id="progress-@equipment.Id" style="height: 20px; display: none;">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
+                                         role="progressbar" style="width: 0%">
+                                        <span class="progress-text small fw-bold">0%</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Update Status -->
+                                <div id="status-@equipment.Id" class="small text-muted">
+                                    @if (equipment.IsOnline && equipment.Status == EquipmentStatus.Idle)
+                                    {
+                                        <text><i class="fas fa-check-circle text-success"></i> Ready for Update</text>
+                                    }
+                                    else if (!equipment.IsOnline)
+                                    {
+                                        <text><i class="fas fa-exclamation-triangle text-danger"></i></text> @GetLocalizedString("EquipmentOffline")
+                                    }
+                                    else
+                                    {
+                                        <text><i class="fas fa-clock text-warning"></i></text> @GetLocalizedString("EquipmentBusy")
+                                    }
+                                </div>
+                            </td>
+                            <td>
+                                @if (equipment.IsOnline && equipment.Status == EquipmentStatus.Idle)
+                                {
+                                    <button class="btn btn-primary btn-sm" onclick="updateSingleEquipment(@equipment.Id)" 
+                                            id="update-btn-@equipment.Id">
+                                        <i class="fas fa-download"></i> Update
+                                    </button>
+                                }
+                                else if (!equipment.IsOnline)
+                                {
+                                    <button class="btn btn-secondary btn-sm" disabled>
+                                        <i class="fas fa-times"></i> Offline
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-warning btn-sm" disabled>
+                                        <i class="fas fa-clock"></i> Busy
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Bulk Actions Footer -->
+    <div class="card-footer" id="bulkActionsFooter" style="display: none;">
+        <div class="row align-items-center">
+            <div class="col">
+                <span id="selectedCount">0</span> equipment selected
+            </div>
+            <div class="col-auto">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-success" onclick="updateSelectedEquipment()" id="bulkUpdateBtn">
+                        <i class="fas fa-download"></i> Update Selected Equipment
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="clearSelection()">
+                        <i class="fas fa-times"></i> Clear Selection
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @if (!Model.Any())
@@ -105,88 +246,439 @@
     </div>
 }
 
+<!-- Update Summary Modal -->
+<div class="modal fade" id="updateSummaryModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-download"></i> Update Summary
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="updateSummaryContent">
+                    <!-- Summary content will be populated here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="startBulkUpdate()">
+                    <i class="fas fa-play"></i> Start Update Process
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.1) !important;
+}
+
+.equipment-checkbox:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.progress {
+    border-radius: 10px;
+    background-color: #e9ecef;
+}
+
+.progress-bar {
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.form-check-input:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.card-footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.alert {
+    border-radius: 8px;
+}
+
+#fileSelectionCard {
+    animation: slideDown 0.3s ease-out;
+}
+
+@@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.table-responsive {
+    border-radius: 8px;
+}
+
+.badge.fs-6 {
+    font-size: 0.75rem !important;
+}
+</style>
+
 @section Scripts {
     <script>
-        function updateEquipment(equipmentId) {
-            const btn = $(`#update-btn-${equipmentId}`);
-            const progress = $(`#progress-${equipmentId}`);
-            const progressBar = progress.find('.progress-bar');
-            const progressText = progress.find('.progress-text');
-            
-            if (confirm('@GetLocalizedString("ConfirmUpdateEquipment")')) {
-                // 버튼 비활성화
-                btn.prop('disabled', true);
-                btn.html('<i class="fas fa-spinner fa-spin"></i> @GetLocalizedString("StartingUpdate")');
+        let selectedFile = null;
+        let updateQueue = [];
+        
+        // File selection functions
+        function selectUpdateFile() {
+            $('#fileSelectionCard').slideDown();
+            $('#updateFileInput').click();
+        }
+        
+        $('#updateFileInput').change(function() {
+            const file = this.files[0];
+            if (file) {
+                $('#loadFileBtn').prop('disabled', false);
+                displayFileInfo(file);
+            } else {
+                $('#loadFileBtn').prop('disabled', true);
+                $('#fileInfoDisplay').hide();
+            }
+        });
+        
+        function displayFileInfo(file) {
+            $('#fileName').text(file.name);
+            $('#fileSize').text(formatFileSize(file.size));
+            $('#fileInfoDisplay').show();
+        }
+        
+        function loadUpdateFile() {
+            const file = $('#updateFileInput')[0].files[0];
+            if (file) {
+                selectedFile = file;
+                showNotification(`Update file "${file.name}" loaded successfully!`, 'success');
+                $('#fileSelectionCard').slideUp();
                 
-                // 진행 표시줄 표시
-                progress.show();
-                
-                // 시뮬레이션된 진행률 업데이트
-                let progressValue = 0;
-                const progressInterval = setInterval(() => {
-                    progressValue += Math.random() * 15;
-                    if (progressValue > 90) progressValue = 90;
-                    
-                    progressBar.css('width', progressValue + '%');
-                    progressText.text(Math.round(progressValue) + '%');
-                }, 500);
-                
-                // 실제 업데이트 요청
-                $.post('@Url.Action("UpdateProgram", "Equipment")', { id: equipmentId })
-                    .done(function(response) {
-                        clearInterval(progressInterval);
-                        
-                        if (response.success) {
-                            // 완료 애니메이션
-                            progressBar.css('width', '100%');
-                            progressText.text('100%');
-                            
-                            setTimeout(() => {
-                                showNotification('@GetLocalizedString("EquipmentUpdatedSuccessfully")', 'success');
-                                btn.html('<i class="fas fa-check"></i> @GetLocalizedString("UpdateComplete")');
-                                btn.removeClass('btn-primary').addClass('btn-success');
-                                
-                                // 3초 후 페이지 새로고침
-                                setTimeout(() => {
-                                    location.reload();
-                                }, 3000);
-                            }, 1000);
-                        } else {
-                            showNotification(response.message || '@GetLocalizedString("UpdateFailed")', 'danger');
-                            resetButton(equipmentId);
-                        }
-                    })
-                    .fail(function() {
-                        clearInterval(progressInterval);
-                        showNotification('@GetLocalizedString("ErrorOccurredDuringUpdate")', 'danger');
-                        resetButton(equipmentId);
-                    });
+                // Enable update buttons
+                $('.btn-primary[id^="update-btn-"]').prop('disabled', false);
+                $('#bulkUpdateBtn').prop('disabled', false);
             }
         }
         
-        function resetButton(equipmentId) {
+        function cancelFileSelection() {
+            $('#fileSelectionCard').slideUp();
+            $('#updateFileInput').val('');
+            $('#fileInfoDisplay').hide();
+            $('#loadFileBtn').prop('disabled', true);
+        }
+        
+        // Checkbox management
+        $('#masterCheckbox').change(function() {
+            const isChecked = $(this).is(':checked');
+            $('.equipment-checkbox:not(:disabled)').prop('checked', isChecked);
+            updateSelectionDisplay();
+        });
+        
+        $('#selectAllEquipment').change(function() {
+            const isChecked = $(this).is(':checked');
+            $('.equipment-checkbox:not(:disabled)').prop('checked', isChecked);
+            $('#masterCheckbox').prop('checked', isChecked);
+            updateSelectionDisplay();
+        });
+        
+        $(document).on('change', '.equipment-checkbox', function() {
+            updateSelectionDisplay();
+            updateMasterCheckbox();
+        });
+        
+        function updateMasterCheckbox() {
+            const totalCheckboxes = $('.equipment-checkbox:not(:disabled)').length;
+            const checkedCheckboxes = $('.equipment-checkbox:checked').length;
+            
+            if (checkedCheckboxes === 0) {
+                $('#masterCheckbox').prop('indeterminate', false).prop('checked', false);
+            } else if (checkedCheckboxes === totalCheckboxes) {
+                $('#masterCheckbox').prop('indeterminate', false).prop('checked', true);
+            } else {
+                $('#masterCheckbox').prop('indeterminate', true);
+            }
+        }
+        
+        function updateSelectionDisplay() {
+            const selectedCount = $('.equipment-checkbox:checked').length;
+            $('#selectedCount').text(selectedCount);
+            
+            if (selectedCount > 0) {
+                $('#bulkActionsFooter').slideDown();
+            } else {
+                $('#bulkActionsFooter').slideUp();
+            }
+        }
+        
+        function clearSelection() {
+            $('.equipment-checkbox').prop('checked', false);
+            $('#masterCheckbox').prop('checked', false).prop('indeterminate', false);
+            $('#selectAllEquipment').prop('checked', false);
+            updateSelectionDisplay();
+        }
+        
+        // Update functions
+        function updateSingleEquipment(equipmentId) {
+            if (!selectedFile) {
+                showNotification('Please select an update file first!', 'warning');
+                selectUpdateFile();
+                return;
+            }
+            
+            if (confirm('@GetLocalizedString("ConfirmUpdateEquipment")')) {
+                executeUpdate([equipmentId]);
+            }
+        }
+        
+        function updateSelectedEquipment() {
+            if (!selectedFile) {
+                showNotification('Please select an update file first!', 'warning');
+                selectUpdateFile();
+                return;
+            }
+            
+            const selectedIds = $('.equipment-checkbox:checked').map(function() {
+                return parseInt($(this).val());
+            }).get();
+            
+            if (selectedIds.length === 0) {
+                showNotification('Please select equipment to update!', 'warning');
+                return;
+            }
+            
+            showUpdateSummary(selectedIds);
+        }
+        
+        function showUpdateSummary(equipmentIds) {
+            let summaryHtml = `
+                <div class="mb-3">
+                    <h6><i class="fas fa-info-circle text-primary"></i> Update Details</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Update File:</strong><br>
+                            <span class="text-muted">${selectedFile.name}</span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Target Version:</strong><br>
+                            <span class="text-muted">v2.2.0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <h6><i class="fas fa-server text-info"></i> Equipment to Update (${equipmentIds.length})</h6>
+                    <div class="list-group">
+            `;
+            
+            equipmentIds.forEach(id => {
+                const row = $(`#equipment-row-${id}`);
+                const name = row.find('.fw-bold').text();
+                const version = row.find('td:nth-child(4) .fw-bold').text();
+                
+                summaryHtml += `
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>${name}</strong>
+                            <small class="text-muted d-block">Current: ${version} → Target: v2.2.0</small>
+                        </div>
+                        <span class="badge bg-primary rounded-pill">Ready</span>
+                    </div>
+                `;
+            });
+            
+            summaryHtml += '</div></div>';
+            
+            summaryHtml += `
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Important:</strong> The update process will take approximately 3-5 minutes per equipment. 
+                    Do not power off the equipment during the update process.
+                </div>
+            `;
+            
+            $('#updateSummaryContent').html(summaryHtml);
+            updateQueue = equipmentIds;
+            $('#updateSummaryModal').modal('show');
+        }
+        
+        function startBulkUpdate() {
+            $('#updateSummaryModal').modal('hide');
+            executeUpdate(updateQueue);
+        }
+        
+        function executeUpdate(equipmentIds) {
+            equipmentIds.forEach((id, index) => {
+                setTimeout(() => {
+                    performUpdate(id);
+                }, index * 1000); // 1초 간격으로 시작
+            });
+        }
+        
+        function performUpdate(equipmentId) {
             const btn = $(`#update-btn-${equipmentId}`);
             const progress = $(`#progress-${equipmentId}`);
+            const status = $(`#status-${equipmentId}`);
+            const progressBar = progress.find('.progress-bar');
+            const progressText = progress.find('.progress-text');
             
+            // UI 상태 변경
+            btn.prop('disabled', true);
+            btn.html('<i class="fas fa-spinner fa-spin"></i> Updating...');
+            progress.show();
+            status.html('<i class="fas fa-upload text-primary"></i> @GetLocalizedString("StartingUpdate")');
+            
+            // 진행률 시뮬레이션
+            let progressValue = 0;
+            const progressInterval = setInterval(() => {
+                progressValue += Math.random() * 15;
+                if (progressValue > 90) progressValue = 90;
+                
+                progressBar.css('width', progressValue + '%');
+                progressText.text(Math.round(progressValue) + '%');
+                
+                // 상태 메시지 업데이트
+                if (progressValue < 30) {
+                    status.html('<i class="fas fa-upload text-primary"></i> Uploading firmware...');
+                } else if (progressValue < 60) {
+                    status.html('<i class="fas fa-cog fa-spin text-warning"></i> Installing update...');
+                } else if (progressValue < 90) {
+                    status.html('<i class="fas fa-sync fa-spin text-info"></i> Verifying installation...');
+                }
+            }, 500);
+            
+            // 실제 업데이트 요청
+            $.post('@Url.Action("UpdateProgram", "Equipment")', { 
+                id: equipmentId,
+                fileName: selectedFile ? selectedFile.name : 'update.bin'
+            })
+            .done(function(response) {
+                clearInterval(progressInterval);
+                
+                if (response.success) {
+                    // 성공 처리
+                    progressBar.css('width', '100%').removeClass('bg-primary').addClass('bg-success');
+                    progressText.text('100%');
+                    status.html('<i class="fas fa-check-circle text-success"></i> @GetLocalizedString("UpdateComplete")');
+                    
+                    btn.html('<i class="fas fa-check"></i> Updated');
+                    btn.removeClass('btn-primary').addClass('btn-success');
+                    
+                    // 버전 정보 업데이트
+                    const versionCell = $(`#equipment-row-${equipmentId} td:nth-child(4)`);
+                    versionCell.find('.fw-bold').text('v2.2.0');
+                    versionCell.find('small').html('<i class="fas fa-check text-success"></i> Latest');
+                    
+                    showNotification(`Equipment ${equipmentId} updated successfully!`, 'success');
+                } else {
+                    handleUpdateError(equipmentId, response.message);
+                }
+            })
+            .fail(function() {
+                clearInterval(progressInterval);
+                handleUpdateError(equipmentId, 'Network error occurred');
+            });
+        }
+        
+        function handleUpdateError(equipmentId, errorMessage) {
+            const btn = $(`#update-btn-${equipmentId}`);
+            const progress = $(`#progress-${equipmentId}`);
+            const status = $(`#status-${equipmentId}`);
+            const progressBar = progress.find('.progress-bar');
+            
+            progressBar.removeClass('bg-primary').addClass('bg-danger');
+            status.html('<i class="fas fa-exclamation-triangle text-danger"></i> Update failed');
+            
+            btn.html('<i class="fas fa-redo"></i> Retry');
+            btn.removeClass('btn-primary').addClass('btn-warning');
             btn.prop('disabled', false);
-            btn.html('<i class="fas fa-download"></i> @GetLocalizedString("UpdateToVersion") v2.2.0');
-            progress.hide();
-            progress.find('.progress-bar').css('width', '0%');
-            progress.find('.progress-text').text('0%');
+            
+            showNotification(`Equipment ${equipmentId} update failed: ${errorMessage}`, 'danger');
+        }
+        
+        // Utility functions
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
         
         function showNotification(message, type) {
             const alertHtml = `
-                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                <div class="alert alert-${type} alert-dismissible fade show notification-alert" role="alert">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
                     ${message}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             `;
-            $('.container-fluid main').prepend(alertHtml);
+            
+            let container = $('#notification-container');
+            if (container.length === 0) {
+                container = $('<div id="notification-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999; width: 350px;"></div>');
+                $('body').append(container);
+            }
+            
+            container.append(alertHtml);
             
             setTimeout(() => {
-                $('.alert').first().fadeOut();
+                container.find('.notification-alert').first().fadeOut(300, function() {
+                    $(this).remove();
+                });
             }, 5000);
+        }
+        
+        // Initialize
+        $(document).ready(function() {
+            updateSelectionDisplay();
+            
+            // 파일 드래그 앤 드롭 지원
+            $(document).on('dragover', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+            
+            $(document).on('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const files = e.originalEvent.dataTransfer.files;
+                if (files.length > 0) {
+                    const file = files[0];
+                    if (isValidUpdateFile(file)) {
+                        $('#updateFileInput')[0].files = files;
+                        $('#updateFileInput').trigger('change');
+                        $('#fileSelectionCard').slideDown();
+                    } else {
+                        showNotification('Invalid file type. Please select a valid update file.', 'warning');
+                    }
+                }
+            });
+        });
+        
+        function isValidUpdateFile(file) {
+            const validExtensions = ['.zip', '.tar', '.gz', '.bin', '.hex', '.fw'];
+            const fileName = file.name.toLowerCase();
+            return validExtensions.some(ext => fileName.endsWith(ext));
         }
     </script>
 }

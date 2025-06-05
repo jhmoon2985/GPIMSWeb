@@ -67,12 +67,23 @@
 <div class="row mb-4">
     <!-- Channels Table (75% width) -->
     <div class="col-lg-9 mb-4">
-        <div class="card" style="height: 408px;"> <!-- 카드 높이 고정 -->
-            <div class="card-header">
+        <div class="card" style="height: 450px;"> <!-- 카드 높이 조정 -->
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="fas fa-list"></i> @GetLocalizedString("Channels")</h5>
+                <div class="btn-group btn-group-sm justify-content-between align-items-center" role="group">
+                    <button type="button" class="btn btn-outline-primary" onclick="selectAllChannels()">
+                        <i class="fas fa-check-square"></i> Select All
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="clearChannelSelection()">
+                        <i class="fas fa-square"></i> Clear
+                    </button>
+                    <span class="badge bg-info ms-2" id="selectedChannelsBadge" style="display: none;">
+                        <span id="selectedCount">0</span> selected
+                    </span>
+                </div>
             </div>
             <div class="card-body p-0">
-                <div class="table-container" style="height: 360px; overflow-y: auto;"> <!-- 내부 테이블 컨테이너 높이 고정 -->
+                <div class="table-container" style="height: 320px; overflow-y: auto;"> <!-- 내부 테이블 컨테이너 높이 조정 -->
                     <table class="table table-striped mb-0" id="channelsTable">
                         <thead class="table-dark sticky-top">
                             <tr>
@@ -90,8 +101,8 @@
                         <tbody id="channelsTableBody">
                             @foreach (var channel in Model.Channels)
                             {
-                                <tr data-channel="@channel.ChannelNumber">
-                                    <td>@channel.ChannelNumber.ToString("D2")</td>
+                                <tr data-channel="@channel.ChannelNumber" class="channel-row" onclick="selectChannel(event, @channel.ChannelNumber)">
+                                    <td class="channel-number">@channel.ChannelNumber.ToString("D2")</td>
                                     <td>
                                         <span class="badge bg-@(channel.Status == ChannelStatus.Active ? "success" : channel.Status == ChannelStatus.Error ? "danger" : "secondary")">
                                             @GetLocalizedString(channel.Status.ToString())
@@ -110,17 +121,44 @@
                     </table>
                 </div>
             </div>
+            
+            <!-- Channel Actions Footer -->
+            <div class="card-footer" id="channelActionsFooter" style="display: none;">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <small class="text-muted">
+                            <span id="channelSelectedCount">0</span> channels selected
+                        </small>
+                    </div>
+                    <div class="col-auto">
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-success" onclick="startSelectedChannels()">
+                                <i class="fas fa-play"></i> Start
+                            </button>
+                            <button type="button" class="btn btn-warning" onclick="pauseSelectedChannels()">
+                                <i class="fas fa-pause"></i> Pause
+                            </button>
+                            <button type="button" class="btn btn-danger" onclick="stopSelectedChannels()">
+                                <i class="fas fa-stop"></i> Stop
+                            </button>
+                            <button type="button" class="btn btn-info" onclick="exportSelectedChannels()">
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Real-time Chart (25% width) -->
     <div class="col-lg-3 mb-4">
-        <div class="card" style="height: 408px;"> <!-- 채널 카드와 동일한 높이 -->
+        <div class="card" style="height: 450px;"> <!-- 채널 카드와 동일한 높이 -->
             <div class="card-header">
                 <h5 class="mb-0"><i class="fas fa-chart-line"></i> @GetLocalizedString("RealTimeChart")</h5>
             </div>
             <div class="card-body">
-                <div id="realtimeChart" style="height: 320px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px;">
+                <div id="realtimeChart" style="height: 360px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px;">
                     <div class="d-flex align-items-center justify-content-center h-100">
                         <div class="text-center text-muted">
                             <i class="fas fa-chart-line fa-2x mb-2"></i>
@@ -140,42 +178,44 @@
     <div class="col-lg-4 mb-4">
         <div class="card" style="height: 350px;"> <!-- 하단 카드들 동일 높이 -->
             <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-network-wired"></i> CAN/LIN Data</h5>
+                <h5 class="mb-0"><i class="fas fa-network-wired"></i> CAN/LIN Data <span id="canLinChannelInfo" class="text-muted small"></span></h5>
             </div>
             <div class="card-body" style="height: 302px; overflow-y: auto;"> <!-- 스크롤 가능한 본문 -->
-                @if (Model.CanLinData.Any())
-                {
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>@GetLocalizedString("Name")</th>
-                                    <th>@GetLocalizedString("MinValue")</th>
-                                    <th>@GetLocalizedString("MaxValue")</th>
-                                    <th>@GetLocalizedString("CurrentValue")</th>
-                                </tr>
-                            </thead>
-                            <tbody id="canlinTableBody">
-                                @foreach (var canlin in Model.CanLinData)
-                                {
-                                    <tr data-name="@canlin.Name">
-                                        <td class="fw-bold">@canlin.Name</td>
-                                        <td>@canlin.MinValue.ToString("F2")</td>
-                                        <td>@canlin.MaxValue.ToString("F2")</td>
-                                        <td class="current-value text-primary fw-bold">@canlin.CurrentValue.ToString("F2")</td>
+                <div id="canLinDataContent">
+                    @if (Model.CanLinData.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>@GetLocalizedString("Name")</th>
+                                        <th>@GetLocalizedString("MinValue")</th>
+                                        <th>@GetLocalizedString("MaxValue")</th>
+                                        <th>@GetLocalizedString("CurrentValue")</th>
                                     </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                }
-                else
-                {
-                    <div class="text-center py-3">
-                        <i class="fas fa-network-wired fa-2x text-muted mb-2"></i>
-                        <div class="text-muted">No CAN/LIN data available</div>
-                    </div>
-                }
+                                </thead>
+                                <tbody id="canlinTableBody">
+                                    @foreach (var canlin in Model.CanLinData)
+                                    {
+                                        <tr data-name="@canlin.Name" data-channel="all">
+                                            <td class="fw-bold">@canlin.Name</td>
+                                            <td>@canlin.MinValue.ToString("F2")</td>
+                                            <td>@canlin.MaxValue.ToString("F2")</td>
+                                            <td class="current-value text-primary fw-bold">@canlin.CurrentValue.ToString("F2")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-3" id="noCanLinData">
+                            <i class="fas fa-network-wired fa-2x text-muted mb-2"></i>
+                            <div class="text-muted">No CAN/LIN data available</div>
+                        </div>
+                    }
+                </div>
             </div>
         </div>
     </div>
@@ -184,36 +224,38 @@
     <div class="col-lg-4 mb-4">
         <div class="card" style="height: 350px;"> <!-- 하단 카드들 동일 높이 -->
             <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-thermometer-half"></i> @GetLocalizedString("AuxSensors")</h5>
+                <h5 class="mb-0"><i class="fas fa-thermometer-half"></i> @GetLocalizedString("AuxSensors") <span id="auxChannelInfo" class="text-muted small"></span></h5>
             </div>
             <div class="card-body" style="height: 302px; overflow-y: auto;"> <!-- 스크롤 가능한 본문 -->
-                @if (Model.AuxData.Any())
-                {
-                    <div class="row">
-                        @foreach (var aux in Model.AuxData)
-                        {
-                            <div class="col-md-6 mb-3">
-                                <div class="card bg-light border-0">
-                                    <div class="card-body text-center p-3">
-                                        <i class="fas fa-@(aux.Type == AuxDataType.Temperature ? "thermometer-half text-warning" : aux.Type == AuxDataType.Voltage ? "bolt text-primary" : "microchip text-info") fa-lg mb-2"></i>
-                                        <div class="small fw-bold">@aux.Name</div>
-                                        <div class="h5 text-primary mb-1" data-aux="@aux.SensorId">
-                                            @aux.Value.ToString("F1")@(aux.Type == AuxDataType.Temperature ? "°C" : aux.Type == AuxDataType.Voltage ? "V" : "Ω")
+                <div id="auxDataContent">
+                    @if (Model.AuxData.Any())
+                    {
+                        <div class="row" id="auxSensorGrid">
+                            @foreach (var aux in Model.AuxData)
+                            {
+                                <div class="col-md-6 mb-3" data-channel="all">
+                                    <div class="card bg-light border-0">
+                                        <div class="card-body text-center p-3">
+                                            <i class="fas fa-@(aux.Type == AuxDataType.Temperature ? "thermometer-half text-warning" : aux.Type == AuxDataType.Voltage ? "bolt text-primary" : "microchip text-info") fa-lg mb-2"></i>
+                                            <div class="small fw-bold">@aux.Name</div>
+                                            <div class="h5 text-primary mb-1" data-aux="@aux.SensorId">
+                                                @aux.Value.ToString("F1")@(aux.Type == AuxDataType.Temperature ? "°C" : aux.Type == AuxDataType.Voltage ? "V" : "Ω")
+                                            </div>
+                                            <small class="text-muted">@aux.LastUpdateTime.ToString("HH:mm:ss")</small>
                                         </div>
-                                        <small class="text-muted">@aux.LastUpdateTime.ToString("HH:mm:ss")</small>
                                     </div>
                                 </div>
-                            </div>
-                        }
-                    </div>
-                }
-                else
-                {
-                    <div class="text-center py-3">
-                        <i class="fas fa-thermometer-half fa-2x text-muted mb-2"></i>
-                        <div class="text-muted">No AUX sensor data available</div>
-                    </div>
-                }
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-3" id="noAuxData">
+                            <i class="fas fa-thermometer-half fa-2x text-muted mb-2"></i>
+                            <div class="text-muted">No AUX sensor data available</div>
+                        </div>
+                    }
+                </div>
             </div>
         </div>
     </div>
@@ -324,9 +366,53 @@
         background-color: rgba(0,123,255,0.1);
     }
     
+    .channel-row.selected {
+        background-color: rgba(13, 110, 253, 0.2) !important;
+        border-left: 4px solid #0d6efd;
+        color: #000;
+    }
+    
+    .channel-row {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        user-select: none;
+    }
+    
+    .channel-row:hover {
+        background-color: rgba(0,123,255,0.1) !important;
+    }
+    
+    .channel-row.selected:hover {
+        background-color: rgba(13, 110, 253, 0.25) !important;
+    }
+    
+    .table tbody tr.selected td {
+        background-color: transparent;
+    }
+    
+    .card-footer {
+        background-color: #f8f9fa;
+        border-top: 1px solid #dee2e6;
+        padding: 0.75rem 1rem;
+    }
+    
+    .btn-group-sm .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+    
     .equipment-status-badge {
         font-size: 0.75rem;
         padding: 0.35rem 0.65rem;
+    }
+    
+    .channel-row {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .channel-row:hover {
+        background-color: rgba(0,123,255,0.05) !important;
     }
 </style>
 
@@ -494,6 +580,311 @@
             }
         }
 
+        // 채널 선택 관련 변수
+        let selectedChannels = [];
+        let lastSelectedChannel = null;
+
+        // 채널 선택 함수 (행 클릭)
+        function selectChannel(event, channelNumber) {
+            event.preventDefault();
+            
+            if (event.shiftKey && lastSelectedChannel !== null) {
+                // Shift 키를 누른 상태에서 범위 선택
+                selectChannelRange(lastSelectedChannel, channelNumber);
+            } else if (event.ctrlKey || event.metaKey) {
+                // Ctrl 키를 누른 상태에서 다중 선택
+                toggleChannelSelection(channelNumber);
+            } else {
+                // 일반 선택 (기존 선택 해제)
+                selectedChannels = [channelNumber];
+                lastSelectedChannel = channelNumber;
+                updateChannelDisplay();
+            }
+        }
+        
+        function toggleChannelSelection(channelNumber) {
+            const index = selectedChannels.indexOf(channelNumber);
+            if (index > -1) {
+                selectedChannels.splice(index, 1);
+            } else {
+                selectedChannels.push(channelNumber);
+            }
+            lastSelectedChannel = channelNumber;
+            updateChannelDisplay();
+        }
+        
+        function selectChannelRange(start, end) {
+            const startNum = Math.min(start, end);
+            const endNum = Math.max(start, end);
+            
+            // 범위 내의 모든 채널을 선택
+            for (let i = startNum; i <= endNum; i++) {
+                if (!selectedChannels.includes(i)) {
+                    selectedChannels.push(i);
+                }
+            }
+            
+            lastSelectedChannel = end;
+            updateChannelDisplay();
+        }
+        
+        function selectAllChannels() {
+            selectedChannels = [];
+            $('.channel-row').each(function() {
+                const channelNum = parseInt($(this).data('channel'));
+                selectedChannels.push(channelNum);
+            });
+            lastSelectedChannel = selectedChannels[selectedChannels.length - 1];
+            updateChannelDisplay();
+        }
+        
+        function clearChannelSelection() {
+            selectedChannels = [];
+            lastSelectedChannel = null;
+            updateChannelDisplay();
+        }
+        
+        function updateChannelDisplay() {
+            // 모든 행의 선택 상태 초기화
+            $('.channel-row').removeClass('selected');
+            
+            // 선택된 채널들 강조
+            selectedChannels.forEach(channelNum => {
+                $(`.channel-row[data-channel="${channelNum}"]`).addClass('selected');
+            });
+            
+            // 선택된 채널 수 업데이트
+            $('#selectedCount').text(selectedChannels.length);
+            $('#channelSelectedCount').text(selectedChannels.length);
+            
+            // UI 표시/숨김
+            if (selectedChannels.length > 0) {
+                $('#channelActionsFooter').slideDown();
+                $('#selectedChannelsBadge').show();
+            } else {
+                $('#channelActionsFooter').slideUp();
+                $('#selectedChannelsBadge').hide();
+            }
+            
+            // 선택된 채널에 따른 CAN/LIN 및 AUX 데이터 필터링
+            updateRelatedData();
+        }
+        
+        function updateRelatedData() {
+            if (selectedChannels.length === 0) {
+                // 선택된 채널이 없으면 모든 데이터 표시
+                showAllCanLinData();
+                showAllAuxData();
+                $('#canLinChannelInfo').text('');
+                $('#auxChannelInfo').text('');
+            } else if (selectedChannels.length === 1) {
+                // 단일 채널 선택 시 해당 채널 데이터만 표시
+                const channelNum = selectedChannels[0];
+                showChannelCanLinData(channelNum);
+                showChannelAuxData(channelNum);
+                $('#canLinChannelInfo').text(`(Channel ${channelNum})`);
+                $('#auxChannelInfo').text(`(Channel ${channelNum})`);
+            } else {
+                // 다중 채널 선택 시 모든 데이터 표시하되 헤더에 정보 표시
+                showAllCanLinData();
+                showAllAuxData();
+                $('#canLinChannelInfo').text(`(${selectedChannels.length} channels selected)`);
+                $('#auxChannelInfo').text(`(${selectedChannels.length} channels selected)`);
+            }
+        }
+        
+        function showChannelCanLinData(channelNum) {
+            // 실제 구현에서는 채널별 CAN/LIN 데이터를 필터링
+            // 여기서는 시뮬레이션으로 일부 데이터만 표시
+            const channelSpecificData = [
+                { name: `CH${channelNum}_Voltage`, min: 0, max: 5, current: (3.7 + channelNum * 0.1).toFixed(2) },
+                { name: `CH${channelNum}_Current`, min: 0, max: 3, current: (1.5 + channelNum * 0.2).toFixed(2) },
+                { name: `CH${channelNum}_Status`, min: 0, max: 1, current: channelNum <= 4 ? "1" : "0" }
+            ];
+            
+            let tableHtml = `
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Min</th>
+                                <th>Max</th>
+                                <th>Current</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            channelSpecificData.forEach(data => {
+                tableHtml += `
+                    <tr>
+                        <td class="fw-bold">${data.name}</td>
+                        <td>${data.min}</td>
+                        <td>${data.max}</td>
+                        <td class="current-value text-primary fw-bold">${data.current}</td>
+                    </tr>
+                `;
+            });
+            
+            tableHtml += '</tbody></table></div>';
+            $('#canLinDataContent').html(tableHtml);
+        }
+        
+        function showChannelAuxData(channelNum) {
+            // 실제 구현에서는 채널별 AUX 데이터를 필터링
+            // 여기서는 시뮬레이션으로 채널별 센서 데이터 표시
+            const auxSensors = [
+                { name: `CH${channelNum} Temp`, type: 'Temperature', value: (25 + channelNum * 2).toFixed(1), unit: '°C', icon: 'thermometer-half text-warning' },
+                { name: `CH${channelNum} NTC`, type: 'NTC', value: (1000 + channelNum * 50).toFixed(0), unit: 'Ω', icon: 'microchip text-info' }
+            ];
+            
+            let auxHtml = '<div class="row">';
+            auxSensors.forEach(sensor => {
+                auxHtml += `
+                    <div class="col-md-6 mb-3">
+                        <div class="card bg-light border-0">
+                            <div class="card-body text-center p-3">
+                                <i class="fas fa-${sensor.icon} fa-lg mb-2"></i>
+                                <div class="small fw-bold">${sensor.name}</div>
+                                <div class="h5 text-primary mb-1">${sensor.value}${sensor.unit}</div>
+                                <small class="text-muted">${new Date().toLocaleTimeString()}</small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            auxHtml += '</div>';
+            
+            $('#auxDataContent').html(auxHtml);
+        }
+        
+        function showAllCanLinData() {
+            // 원래 모든 CAN/LIN 데이터 표시
+            $('#canlinTableBody tr').show();
+        }
+        
+        function showAllAuxData() {
+            // 원래 모든 AUX 데이터 표시
+            $('#auxSensorGrid > div').show();
+        }         
+        // 채널 액션 함수들
+        function startSelectedChannels() {
+            if (selectedChannels.length === 0) {
+                showNotification('Please select channels first', 'warning');
+                return;
+            }
+            
+            if (confirm(`Start operation for ${selectedChannels.length} selected channels?`)) {
+                selectedChannels.forEach(channelNum => {
+                    // 실제 API 호출로 대체 가능
+                    console.log(`Starting channel ${channelNum}`);
+                    
+                    // UI 업데이트 - 상태 배지를 Active로 변경
+                    const row = $(`.channel-row[data-channel="${channelNum}"]`);
+                    const badge = row.find('.badge');
+                    badge.removeClass('bg-secondary bg-danger').addClass('bg-success').text('@GetLocalizedString("Active")');
+                });
+                showNotification(`Started ${selectedChannels.length} channels`, 'success');
+            }
+        }
+        
+        function pauseSelectedChannels() {
+            if (selectedChannels.length === 0) {
+                showNotification('Please select channels first', 'warning');
+                return;
+            }
+            
+            if (confirm(`Pause operation for ${selectedChannels.length} selected channels?`)) {
+                selectedChannels.forEach(channelNum => {
+                    console.log(`Pausing channel ${channelNum}`);
+                    
+                    // UI 업데이트 - 상태 배지를 Pause로 변경
+                    const row = $(`.channel-row[data-channel="${channelNum}"]`);
+                    const badge = row.find('.badge');
+                    badge.removeClass('bg-success bg-danger').addClass('bg-secondary').text('@GetLocalizedString("Pause")');
+                });
+                showNotification(`Paused ${selectedChannels.length} channels`, 'warning');
+            }
+        }
+        
+        function stopSelectedChannels() {
+            if (selectedChannels.length === 0) {
+                showNotification('Please select channels first', 'warning');
+                return;
+            }
+            
+            if (confirm(`Stop operation for ${selectedChannels.length} selected channels? This action cannot be undone.`)) {
+                selectedChannels.forEach(channelNum => {
+                    console.log(`Stopping channel ${channelNum}`);
+                    
+                    // UI 업데이트 - 상태 배지를 Idle로 변경
+                    const row = $(`.channel-row[data-channel="${channelNum}"]`);
+                    const badge = row.find('.badge');
+                    badge.removeClass('bg-success bg-danger').addClass('bg-secondary').text('@GetLocalizedString("Idle")');
+                    
+                    // 데이터 초기화
+                    row.find('.current').text('0.00');
+                    row.find('.power').text('0.00');
+                    row.find('.energy').text('0.0');
+                });
+                showNotification(`Stopped ${selectedChannels.length} channels`, 'danger');
+            }
+        }
+        
+        function exportSelectedChannels() {
+            if (selectedChannels.length === 0) {
+                showNotification('Please select channels first', 'warning');
+                return;
+            }
+            
+            // 선택된 채널 데이터 수집
+            const channelData = [];
+            selectedChannels.forEach(channelNum => {
+                const row = $(`.channel-row[data-channel="${channelNum}"]`);
+                const data = {
+                    channel: channelNum,
+                    status: row.find('.badge').text().trim(),
+                    voltage: row.find('.voltage').text(),
+                    current: row.find('.current').text(),
+                    capacity: row.find('.capacity').text(),
+                    power: row.find('.power').text(),
+                    energy: row.find('.energy').text()
+                };
+                channelData.push(data);
+            });
+            
+            // CSV 형태로 다운로드
+            downloadChannelDataCSV(channelData);
+            showNotification(`Exported data for ${selectedChannels.length} channels`, 'success');
+        }
+        
+        function downloadChannelDataCSV(data) {
+            const headers = ['Channel', 'Status', 'Voltage(V)', 'Current(A)', 'Capacity(Ah)', 'Power(W)', 'Energy(Wh)'];
+            const csvContent = [
+                headers.join(','),
+                ...data.map(row => [
+                    row.channel,
+                    row.status,
+                    row.voltage,
+                    row.current,
+                    row.capacity,
+                    row.power,
+                    row.energy
+                ].join(','))
+            ].join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `equipment_${equipmentId}_channels_${new Date().toISOString().slice(0, 10)}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         function refreshData() {
             location.reload();
         }
@@ -512,9 +903,23 @@
             }, 3000);
         }
 
-        // 페이지 로드 시 SignalR 연결
+        // 이벤트 리스너 추가
         $(document).ready(function() {
+            // SignalR 연결
             setupSignalR();
+            
+            // 키보드 이벤트 방지 (테이블에서 텍스트 선택 방지)
+            $(document).on('selectstart', '.channel-row', function(e) {
+                if (e.shiftKey) {
+                    e.preventDefault();
+                }
+            });
+            
+            // 초기 상태 설정
+            updateChannelDisplay();
+            
+            // 도움말 표시
+            showNotification('Tip: Click to select, Ctrl+Click for multiple, Shift+Click for range selection', 'info');
             
             // 주기적으로 데이터 새로고침 (30초마다)
             setInterval(function() {

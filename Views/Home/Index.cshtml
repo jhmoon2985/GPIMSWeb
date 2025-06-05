@@ -43,32 +43,69 @@
     </div>
 </div>
 
-<div class="row" id="equipmentGrid">
+<div class="equipment-grid" id="equipmentGrid">
     @foreach (var equipment in Model)
     {
-        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-            <div class="card equipment-card @(equipment.IsOnline ? "border-success" : "border-danger")" 
-                 onclick="viewEquipment(@equipment.Id)">
-                <div class="card-body text-center">
-                    <div class="mb-3">
-                        <i class="fas fa-server fa-2x @(equipment.IsOnline ? "text-success" : "text-danger")"></i>
-                    </div>
-                    <h5 class="card-title">@equipment.Name</h5>
-                    <span class="badge @(equipment.IsOnline ? "bg-success" : "bg-danger") mb-2">
-                        @GetLocalizedString(equipment.IsOnline ? "Online" : "Offline")
+        <div class="equipment-card @(equipment.IsOnline ? "online" : "offline") @(equipment.Status.ToString().ToLower())" 
+             data-equipment-id="@equipment.Id">
+            <div class="card-body">
+                @if (equipment.Alarms.Any())
+                {
+                    <div class="alarm-indicator">@equipment.Alarms.Count</div>
+                }
+                
+                <div class="equipment-icon @(equipment.IsOnline ? (equipment.Status == EquipmentStatus.Running ? "running" : equipment.Status == EquipmentStatus.Error ? "error" : "online") : "offline")">
+                    <i class="fas fa-@(equipment.Status == EquipmentStatus.Running ? "play" : equipment.Status == EquipmentStatus.Error ? "exclamation-triangle" : equipment.IsOnline ? "server" : "power-off")"></i>
+                    <div class="status-indicator @(equipment.IsOnline ? "online" : "offline")"></div>
+                </div>
+                
+                <h5 class="equipment-title">@equipment.Name</h5>
+                <p class="equipment-subtitle">
+                    @GetLocalizedString("Equipment") Station
+                    <span class="version-info">
+                        <i class="fas fa-tag"></i> @equipment.Version
                     </span>
-                    <p class="card-text">
-                        <small class="text-muted">
-                            @equipment.Channels.Count(c => c.Status == ChannelStatus.Active) @GetLocalizedString("Channels") @GetLocalizedString("Active")<br>
-                            @GetLocalizedString("LastUpdate"): @equipment.LastUpdateTime.ToString("yyyy-MM-dd HH:mm:ss")
-                        </small>
-                    </p>
-                    @if (equipment.Alarms.Any())
+                </p>
+                
+                <div class="status-badge @(equipment.IsOnline ? (equipment.Status == EquipmentStatus.Running ? "running" : equipment.Status == EquipmentStatus.Error ? "error" : "online") : "offline")">
+                    <i class="fas fa-@(equipment.IsOnline ? "circle" : "times-circle")"></i>
+                    @if (equipment.IsOnline)
                     {
-                        <div class="alert alert-warning alert-sm mb-0">
-                            <i class="fas fa-exclamation-triangle"></i> @equipment.Alarms.Count @GetLocalizedString("Alarms")
-                        </div>
+                        @GetLocalizedString(equipment.Status.ToString())
                     }
+                    else
+                    {
+                        @GetLocalizedString("Offline")
+                    }
+                </div>
+                
+                <div class="equipment-stats">
+                    <div class="stat-row">
+                        <span class="stat-label">@GetLocalizedString("Channels") @GetLocalizedString("Active")</span>
+                        <span class="stat-value">@equipment.Channels.Count(c => c.Status == ChannelStatus.Active)/@equipment.Channels.Count</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">@GetLocalizedString("LastUpdate")</span>
+                        <span class="stat-value" data-time="@equipment.LastUpdateTime.ToString("yyyy-MM-dd HH:mm:ss")">
+                            @{
+                                var timeAgo = DateTime.Now - equipment.LastUpdateTime;
+                                string timeDisplay = "";
+                                if (timeAgo.TotalMinutes < 1)
+                                    timeDisplay = "Just now";
+                                else if (timeAgo.TotalMinutes < 60)
+                                    timeDisplay = $"{(int)timeAgo.TotalMinutes} min ago";
+                                else if (timeAgo.TotalHours < 24)
+                                    timeDisplay = $"{(int)timeAgo.TotalHours}h ago";
+                                else
+                                    timeDisplay = equipment.LastUpdateTime.ToString("MM-dd HH:mm");
+                            }
+                            @timeDisplay
+                        </span>
+                    </div>
+                    @* <div class="stat-row">
+                        <span class="stat-label">@GetLocalizedString("LastUpdate")</span>
+                        <span class="stat-value">@equipment.LastUpdateTime.ToString("yyyy-MM-dd HH:mm:ss")</span>
+                    </div> *@
                 </div>
             </div>
         </div>
@@ -85,25 +122,349 @@
 }
 
 <style>
+    .equipment-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 25px;
+        margin-top: 20px;
+    }
+
     .equipment-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 24px;
+        padding: 0;
+        border: none;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         cursor: pointer;
-        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        height: 300px; /* 280px → 320px로 증가 */
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     }
+
     .equipment-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transform: translateY(-12px) scale(1.02);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
     }
-    .alert-sm {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.8rem;
+
+    .equipment-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, #28a745, #20c997);
+        border-radius: 24px 24px 0 0;
+    }
+
+    .equipment-card.offline::before {
+        background: linear-gradient(90deg, #dc3545, #fd7e14);
+    }
+
+    .equipment-card.error::before {
+        background: linear-gradient(90deg, #ffc107, #fd7e14);
+    }
+
+    .equipment-card.running::before {
+        background: linear-gradient(90deg, #007bff, #6f42c1);
+    }
+
+    .equipment-card .card-body {
+        padding: 25px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+
+    .equipment-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        position: relative;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .equipment-icon.offline {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
+    }
+
+    .equipment-icon.error {
+        background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+        box-shadow: 0 8px 25px rgba(255, 193, 7, 0.3);
+    }
+
+    .equipment-icon.running {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
+    }
+
+    .equipment-icon.online {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+    }
+
+    .equipment-icon i {
+        font-size: 36px;
+        color: white;
+    }
+
+    .status-indicator {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 3px solid white;
+        animation: pulse 2s infinite;
+    }
+
+    .status-indicator.online {
+        background: #28a745;
+    }
+
+    .status-indicator.offline {
+        background: #dc3545;
+        animation: none;
+    }
+
+    @@keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+    }
+
+    .equipment-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 8px;
+        text-align: center;
+    }
+
+    .equipment-subtitle {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        text-align: center;
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .version-info {
+        font-size: 0.75rem;
+        color: #95a5a6;
+        font-weight: 500;
+    }
+
+    .version-info i {
+        margin-right: 4px;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        margin: 0 auto 15px;
+        backdrop-filter: blur(10px);
+    }
+
+    .status-badge.online {
+        background: rgba(40, 167, 69, 0.15);
+        color: #28a745;
+        border: 1px solid rgba(40, 167, 69, 0.3);
+    }
+
+    .status-badge.offline {
+        background: rgba(220, 53, 69, 0.15);
+        color: #dc3545;
+        border: 1px solid rgba(220, 53, 69, 0.3);
+    }
+
+    .status-badge.running {
+        background: rgba(0, 123, 255, 0.15);
+        color: #007bff;
+        border: 1px solid rgba(0, 123, 255, 0.3);
+    }
+
+    .status-badge.error {
+        background: rgba(255, 193, 7, 0.15);
+        color: #ffc107;
+        border: 1px solid rgba(255, 193, 7, 0.3);
+    }
+
+    .equipment-stats {
+        margin-top: auto;
+        padding-top: 15px;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        min-height: 100px; /* 최소 높이 보장 */
+    }
+
+    .stat-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px; /* 12px → 10px로 조정 */
+        font-size: 0.82rem; /* 0.85rem → 0.82rem로 조정 */
+        line-height: 1.3;
+    }
+
+    .stat-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .stat-label {
+        color: #7f8c8d;
+        font-weight: 500;
+    }
+
+    .stat-value {
+        color: #2c3e50;
+        font-weight: 600;
+    }
+
+    .alarm-indicator {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: #dc3545;
+        color: white;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: bold;
+        animation: shake 0.5s infinite alternate;
+        z-index: 10;
+    }
+
+    @@keyframes shake {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(2px); }
+    }
+
+    .version-badge {
+        display: none; /* 기존 버전 배지 숨김 */
+    }
+
+    /* Card entrance animation */
+    .equipment-card {
+        opacity: 0;
+        animation: fadeInUp 0.6s ease forwards;
+    }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 768px) {
+        .equipment-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        .equipment-card {
+            height: 280px; /* 260px → 300px로 증가 */
+        }
+        
+        .equipment-icon {
+            width: 70px;
+            height: 70px;
+        }
+        
+        .equipment-icon i {
+            font-size: 30px;
+        }
+        
+        .equipment-title {
+            font-size: 1.2rem;
+        }
+    }
+
+    /* Click feedback */
+    .equipment-card:active {
+        transform: translateY(-8px) scale(0.98);
     }
 </style>
 
 @section Scripts {
     <script>
-        function viewEquipment(id) {
-            window.location.href = '@Url.Action("Detail", "Equipment")/' + id;
+        // 상대적 시간 업데이트 함수
+        function updateRelativeTime() {
+            $('.stat-value[data-time]').each(function() {
+                const timeStr = $(this).data('time');
+                const updateTime = new Date(timeStr);
+                const now = new Date();
+                const diffMs = now - updateTime;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMs / 3600000);
+                const diffDays = Math.floor(diffMs / 86400000);
+                
+                let displayText = '';
+                if (diffMins < 1) {
+                    displayText = 'Just now';
+                } else if (diffMins < 60) {
+                    displayText = diffMins + ' min ago';
+                } else if (diffHours < 24) {
+                    displayText = diffHours + 'h ago';
+                } else {
+                    displayText = updateTime.toLocaleDateString() + ' ' + updateTime.toLocaleTimeString().slice(0, 5);
+                }
+                
+                $(this).text(displayText);
+            });
         }
+
+        // 장비 카드 클릭 이벤트를 jQuery로 처리
+        $(document).ready(function() {
+            // 장비 카드 클릭 이벤트
+            $('.equipment-card').on('click', function() {
+                const equipmentId = $(this).data('equipment-id');
+                
+                // 클릭 피드백
+                $(this).css('transform', 'scale(0.98)');
+                
+                setTimeout(() => {
+                    $(this).css('transform', '');
+                    // 상세 페이지로 이동
+                    window.location.href = '/Equipment/Detail/' + equipmentId;
+                }, 150);
+            });
+            
+            // 카드 입장 애니메이션
+            $('.equipment-card').each(function(index) {
+                $(this).css('animation-delay', (index * 0.1) + 's');
+            });
+            
+            // 상대적 시간 업데이트 (1분마다)
+            updateRelativeTime();
+            setInterval(updateRelativeTime, 60000);
+        });
 
         function refreshData() {
             location.reload();

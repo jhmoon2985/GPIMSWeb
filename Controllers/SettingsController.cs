@@ -15,13 +15,16 @@ namespace GPIMSWeb.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IUserService _userService;
+        private readonly IDataSeederService _dataSeederService;
         private readonly IOptionsSnapshot<RequestLocalizationOptions> _localizationOptions;
 
         public SettingsController(ApplicationDbContext context, IUserService userService,
+            IDataSeederService dataSeederService,
             IOptionsSnapshot<RequestLocalizationOptions> localizationOptions)
         {
             _context = context;
             _userService = userService;
+            _dataSeederService = dataSeederService;
             _localizationOptions = localizationOptions;
         }
 
@@ -67,16 +70,25 @@ namespace GPIMSWeb.Controllers
 
                 await _context.SaveChangesAsync();
 
+                // 설정 변경 후 채널 데이터 동기화
+                await _dataSeederService.SeedChannelDataAsync();
+
                 var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
                 await _userService.LogUserActionAsync(userId, "Update Settings", 
-                    $"Equipment: {equipmentCount}, Channels: {channelsPerEquipment}",
+                    $"Equipment: {equipmentCount}, Channels: {channelsPerEquipment} - Data synchronized",
                     HttpContext.Connection.RemoteIpAddress?.ToString());
 
-                return Json(new { success = true });
+                return Json(new { 
+                    success = true, 
+                    message = $"Settings updated successfully! Equipment: {equipmentCount}, Channels per equipment: {channelsPerEquipment}. Database has been synchronized with new settings." 
+                });
             }
-            catch
+            catch (Exception ex)
             {
-                return Json(new { success = false });
+                return Json(new { 
+                    success = false, 
+                    message = $"Error updating settings: {ex.Message}" 
+                });
             }
         }
 
@@ -117,9 +129,38 @@ namespace GPIMSWeb.Controllers
                     message = "Language settings saved. Restart the application to apply the new default language." 
                 });
             }
-            catch
+            catch (Exception ex)
             {
-                return Json(new { success = false, message = "Failed to save language settings." });
+                return Json(new { 
+                    success = false, 
+                    message = $"Failed to save language settings: {ex.Message}" 
+                });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SyncChannelData()
+        {
+            try
+            {
+                await _dataSeederService.SeedChannelDataAsync();
+                
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+                await _userService.LogUserActionAsync(userId, "Sync Channel Data", 
+                    "Manually synchronized channel data with current settings",
+                    HttpContext.Connection.RemoteIpAddress?.ToString());
+
+                return Json(new { 
+                    success = true, 
+                    message = "Channel data synchronized successfully with current settings!" 
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { 
+                    success = false, 
+                    message = $"Error synchronizing channel data: {ex.Message}" 
+                });
             }
         }
     }

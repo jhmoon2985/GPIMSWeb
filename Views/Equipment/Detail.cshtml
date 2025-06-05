@@ -63,42 +63,18 @@
     </div>
 </div>
 
-<!-- Tabs -->
-<ul class="nav nav-tabs" id="equipmentTabs" role="tablist">
-    <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="channels-tab" data-bs-toggle="tab" data-bs-target="#channels" type="button" role="tab">
-            <i class="fas fa-list"></i> @GetLocalizedString("Channels")
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="canlin-tab" data-bs-toggle="tab" data-bs-target="#canlin" type="button" role="tab">
-            <i class="fas fa-network-wired"></i> CAN/LIN
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="aux-tab" data-bs-toggle="tab" data-bs-target="#aux" type="button" role="tab">
-            <i class="fas fa-thermometer-half"></i> @GetLocalizedString("AuxSensors")
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="alarms-tab" data-bs-toggle="tab" data-bs-target="#alarms" type="button" role="tab">
-            <i class="fas fa-exclamation-triangle"></i> @GetLocalizedString("Alarms")
-            @if (Model.Alarms.Any())
-            {
-                <span class="badge bg-danger ms-1">@Model.Alarms.Count</span>
-            }
-        </button>
-    </li>
-</ul>
-
-<div class="tab-content" id="equipmentTabsContent">
-    <!-- Channels Tab -->
-    <div class="tab-pane fade show active" id="channels" role="tabpanel">
-        <div class="card mt-3">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped" id="channelsTable">
-                        <thead class="table-dark">
+<!-- Main Channels Section with Chart -->
+<div class="row mb-4">
+    <!-- Channels Table (75% width) -->
+    <div class="col-lg-9 mb-4">
+        <div class="card" style="height: 408px;"> <!-- 카드 높이 고정 -->
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-list"></i> @GetLocalizedString("Channels")</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-container" style="height: 360px; overflow-y: auto;"> <!-- 내부 테이블 컨테이너 높이 고정 -->
+                    <table class="table table-striped mb-0" id="channelsTable">
+                        <thead class="table-dark sticky-top">
                             <tr>
                                 <th>Ch#</th>
                                 <th>@GetLocalizedString("Status")</th>
@@ -133,114 +109,226 @@
                         </tbody>
                     </table>
                 </div>
-                
-                <!-- Real-time Chart -->
-                <div class="mt-4">
-                    <h5>@GetLocalizedString("RealTimeChart")</h5>
-                    <div id="realtimeChart" style="height: 300px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px;">
-                        <div class="d-flex align-items-center justify-content-center h-100">
-                            <div class="text-center text-muted">
-                                <i class="fas fa-chart-line fa-3x mb-3"></i>
-                                <div>@GetLocalizedString("RealTimeDataVisualization")</div>
-                                <small>@GetLocalizedString("ChartDescription")</small>
-                            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Real-time Chart (25% width) -->
+    <div class="col-lg-3 mb-4">
+        <div class="card" style="height: 408px;"> <!-- 채널 카드와 동일한 높이 -->
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-line"></i> @GetLocalizedString("RealTimeChart")</h5>
+            </div>
+            <div class="card-body">
+                <div id="realtimeChart" style="height: 320px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px;">
+                    <div class="d-flex align-items-center justify-content-center h-100">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-chart-line fa-2x mb-2"></i>
+                            <div class="small">@GetLocalizedString("RealTimeDataVisualization")</div>
+                            <small class="text-muted">@GetLocalizedString("ChartDescription")</small>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- CAN/LIN Tab -->
-    <div class="tab-pane fade" id="canlin" role="tabpanel">
-        <div class="card mt-3">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>@GetLocalizedString("Name")</th>
-                                <th>@GetLocalizedString("MinValue")</th>
-                                <th>@GetLocalizedString("MaxValue")</th>
-                                <th>@GetLocalizedString("CurrentValue")</th>
-                                <th>@GetLocalizedString("LastUpdate")</th>
-                            </tr>
-                        </thead>
-                        <tbody id="canlinTableBody">
-                            @foreach (var canlin in Model.CanLinData)
-                            {
-                                <tr data-name="@canlin.Name">
-                                    <td>@canlin.Name</td>
-                                    <td>@canlin.MinValue.ToString("F2")</td>
-                                    <td>@canlin.MaxValue.ToString("F2")</td>
-                                    <td class="current-value">@canlin.CurrentValue.ToString("F2")</td>
-                                    <td>@canlin.LastUpdateTime.ToString("HH:mm:ss")</td>
+<!-- Secondary Information Row -->
+<div class="row">
+    <!-- CAN/LIN Data -->
+    <div class="col-lg-4 mb-4">
+        <div class="card" style="height: 350px;"> <!-- 하단 카드들 동일 높이 -->
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-network-wired"></i> CAN/LIN Data</h5>
+            </div>
+            <div class="card-body" style="height: 302px; overflow-y: auto;"> <!-- 스크롤 가능한 본문 -->
+                @if (Model.CanLinData.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>@GetLocalizedString("Name")</th>
+                                    <th>@GetLocalizedString("MinValue")</th>
+                                    <th>@GetLocalizedString("MaxValue")</th>
+                                    <th>@GetLocalizedString("CurrentValue")</th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody id="canlinTableBody">
+                                @foreach (var canlin in Model.CanLinData)
+                                {
+                                    <tr data-name="@canlin.Name">
+                                        <td class="fw-bold">@canlin.Name</td>
+                                        <td>@canlin.MinValue.ToString("F2")</td>
+                                        <td>@canlin.MaxValue.ToString("F2")</td>
+                                        <td class="current-value text-primary fw-bold">@canlin.CurrentValue.ToString("F2")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-3">
+                        <i class="fas fa-network-wired fa-2x text-muted mb-2"></i>
+                        <div class="text-muted">No CAN/LIN data available</div>
+                    </div>
+                }
             </div>
         </div>
     </div>
 
-    <!-- AUX Sensors Tab -->
-    <div class="tab-pane fade" id="aux" role="tabpanel">
-        <div class="card mt-3">
-            <div class="card-body">
-                <div class="row">
-                    @foreach (var aux in Model.AuxData)
-                    {
-                        <div class="col-lg-4 col-md-6 mb-3">
-                            <div class="card bg-light">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-@(aux.Type == AuxDataType.Temperature ? "thermometer-half" : aux.Type == AuxDataType.Voltage ? "bolt" : "microchip") fa-2x text-primary mb-2"></i>
-                                    <h6 class="card-title">@aux.Name</h6>
-                                    <h4 class="text-primary" data-aux="@aux.SensorId">
-                                        @aux.Value.ToString("F1")
-                                        @(aux.Type == AuxDataType.Temperature ? "°C" : aux.Type == AuxDataType.Voltage ? "V" : "Ω")
-                                    </h4>
-                                    <small class="text-muted">@aux.LastUpdateTime.ToString("HH:mm:ss")</small>
+    <!-- AUX Sensors -->
+    <div class="col-lg-4 mb-4">
+        <div class="card" style="height: 350px;"> <!-- 하단 카드들 동일 높이 -->
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-thermometer-half"></i> @GetLocalizedString("AuxSensors")</h5>
+            </div>
+            <div class="card-body" style="height: 302px; overflow-y: auto;"> <!-- 스크롤 가능한 본문 -->
+                @if (Model.AuxData.Any())
+                {
+                    <div class="row">
+                        @foreach (var aux in Model.AuxData)
+                        {
+                            <div class="col-md-6 mb-3">
+                                <div class="card bg-light border-0">
+                                    <div class="card-body text-center p-3">
+                                        <i class="fas fa-@(aux.Type == AuxDataType.Temperature ? "thermometer-half text-warning" : aux.Type == AuxDataType.Voltage ? "bolt text-primary" : "microchip text-info") fa-lg mb-2"></i>
+                                        <div class="small fw-bold">@aux.Name</div>
+                                        <div class="h5 text-primary mb-1" data-aux="@aux.SensorId">
+                                            @aux.Value.ToString("F1")@(aux.Type == AuxDataType.Temperature ? "°C" : aux.Type == AuxDataType.Voltage ? "V" : "Ω")
+                                        </div>
+                                        <small class="text-muted">@aux.LastUpdateTime.ToString("HH:mm:ss")</small>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    }
-                </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-3">
+                        <i class="fas fa-thermometer-half fa-2x text-muted mb-2"></i>
+                        <div class="text-muted">No AUX sensor data available</div>
+                    </div>
+                }
             </div>
         </div>
     </div>
 
-    <!-- Alarms Tab -->
-    <div class="tab-pane fade" id="alarms" role="tabpanel">
-        <div class="card mt-3">
-            <div class="card-body">
+    <!-- Alarms -->
+    <div class="col-lg-4 mb-4">
+        <div class="card" style="height: 350px;"> <!-- 하단 카드들 동일 높이 -->
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-exclamation-triangle"></i> @GetLocalizedString("Alarms")
+                </h5>
+                @if (Model.Alarms.Any())
+                {
+                    <span class="badge bg-danger">@Model.Alarms.Count</span>
+                }
+            </div>
+            <div class="card-body" style="height: 302px; overflow-y: auto;"> <!-- 스크롤 가능한 본문 -->
                 <div id="alarmsContainer">
                     @foreach (var alarm in Model.Alarms)
                     {
-                        <div class="alert alert-@(alarm.Level == AlarmLevel.Critical ? "danger" : alarm.Level == AlarmLevel.Error ? "warning" : "info") d-flex justify-content-between align-items-center" data-alarm="@alarm.Id">
-                            <div>
-                                <i class="fas fa-exclamation-triangle me-2"></i>
-                                <strong>@GetLocalizedString(alarm.Level.ToString()):</strong> @alarm.Message
-                                <br><small class="text-muted">@alarm.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")</small>
+                        <div class="alert alert-@(alarm.Level == AlarmLevel.Critical ? "danger" : alarm.Level == AlarmLevel.Error ? "warning" : "info") alert-sm mb-2" data-alarm="@alarm.Id">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold">@GetLocalizedString(alarm.Level.ToString())</div>
+                                    <div class="small">@alarm.Message</div>
+                                    <div class="text-muted small">@alarm.CreatedAt.ToString("MM-dd HH:mm")</div>
+                                </div>
+                                <button class="btn btn-sm btn-outline-danger ms-2" onclick="clearAlarm(@alarm.Id)">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             </div>
-                            <button class="btn btn-sm btn-outline-danger" onclick="clearAlarm(@alarm.Id)">
-                                <i class="fas fa-times"></i> @GetLocalizedString("Clear")
-                            </button>
                         </div>
                     }
                 </div>
                 @if (!Model.Alarms.Any())
                 {
-                    <div class="text-center py-4">
-                        <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
-                        <h5 class="text-success">@GetLocalizedString("NoActiveAlarms")</h5>
-                        <p class="text-muted">@GetLocalizedString("AllSystemsNormal")</p>
+                    <div class="text-center py-3">
+                        <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                        <div class="text-success fw-bold">@GetLocalizedString("NoActiveAlarms")</div>
+                        <small class="text-muted">@GetLocalizedString("AllSystemsNormal")</small>
                     </div>
                 }
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .table-container {
+        border-radius: 8px;
+    }
+
+    .table-container::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .table-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    .table-container::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 4px;
+    }
+
+    .table-container::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+
+    .sticky-top {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .alert-sm {
+        padding: 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .card {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border: none;
+    }
+    
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .table th {
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+    
+    .table td {
+        font-size: 0.875rem;
+        vertical-align: middle;
+    }
+    
+    .table-sm th,
+    .table-sm td {
+        padding: 0.5rem;
+    }
+    
+    #channelsTable tbody tr:hover {
+        background-color: rgba(0,123,255,0.1);
+    }
+    
+    .equipment-status-badge {
+        font-size: 0.75rem;
+        padding: 0.35rem 0.65rem;
+    }
+</style>
 
 @section Scripts {
     <script>
@@ -300,6 +388,12 @@
                 } else {
                     statusBadge.addClass('bg-secondary').text('@GetLocalizedString("Idle")');
                 }
+                
+                // 행 강조 효과
+                row.addClass('table-info');
+                setTimeout(() => {
+                    row.removeClass('table-info');
+                }, 1000);
             }
         }
 
@@ -307,6 +401,12 @@
             const row = $(`#canlinTableBody tr[data-name="${name}"]`);
             if (row.length) {
                 row.find('.current-value').text(data.currentValue.toFixed(2));
+                
+                // 업데이트 강조 효과
+                row.find('.current-value').addClass('text-warning fw-bold');
+                setTimeout(() => {
+                    row.find('.current-value').removeClass('text-warning').addClass('text-primary');
+                }, 500);
             }
         }
 
@@ -315,6 +415,12 @@
             if (element.length) {
                 const unit = data.type === 1 ? '°C' : data.type === 0 ? 'V' : 'Ω';
                 element.text(data.value.toFixed(1) + unit);
+                
+                // 업데이트 강조 효과
+                element.addClass('text-warning');
+                setTimeout(() => {
+                    element.removeClass('text-warning').addClass('text-primary');
+                }, 500);
             }
         }
 
@@ -324,22 +430,30 @@
                 const levelText = alarm.level === 3 ? '@GetLocalizedString("Critical")' : 
                                  alarm.level === 2 ? '@GetLocalizedString("Error")' : 
                                  alarm.level === 1 ? '@GetLocalizedString("Warning")' : '@GetLocalizedString("Info")';
+                
                 const alarmHtml = `
-                    <div class="alert alert-${alertClass} d-flex justify-content-between align-items-center" data-alarm="${alarm.id}">
-                        <div>
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            <strong>${levelText}:</strong> ${alarm.message}
-                            <br><small class="text-muted">${new Date(alarm.createdAt).toLocaleString()}</small>
+                    <div class="alert alert-${alertClass} alert-sm mb-2" data-alarm="${alarm.id}">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <div class="fw-bold">${levelText}</div>
+                                <div class="small">${alarm.message}</div>
+                                <div class="text-muted small">${new Date(alarm.createdAt).toLocaleString()}</div>
+                            </div>
+                            <button class="btn btn-sm btn-outline-danger ms-2" onclick="clearAlarm(${alarm.id})">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </div>
-                        <button class="btn btn-sm btn-outline-danger" onclick="clearAlarm(${alarm.id})">
-                            <i class="fas fa-times"></i> @GetLocalizedString("Clear")
-                        </button>
                     </div>
                 `;
-                $('#alarmsContainer').prepend(alarmHtml);
                 
-                // 알람 탭에 배지 업데이트
+                $('#alarmsContainer').prepend(alarmHtml);
                 updateAlarmBadge();
+                
+                // 알람 카드 강조
+                $('.card:has(#alarmsContainer)').addClass('border-danger');
+                setTimeout(() => {
+                    $('.card:has(#alarmsContainer)').removeClass('border-danger');
+                }, 3000);
             }
         }
 
@@ -352,21 +466,31 @@
                             updateAlarmBadge();
                         });
                     } else {
-                        alert('@GetLocalizedString("FailedToClearAlarm")');
+                        showNotification('@GetLocalizedString("FailedToClearAlarm")', 'danger');
                     }
                 })
                 .fail(function() {
-                    alert('@GetLocalizedString("ErrorClearingAlarm")');
+                    showNotification('@GetLocalizedString("ErrorClearingAlarm")', 'danger');
                 });
         }
 
         function updateAlarmBadge() {
             const alarmCount = $('#alarmsContainer .alert').length;
-            const badge = $('#alarms-tab .badge');
+            const badge = $('.card-header:has(#alarmsContainer) .badge');
             if (alarmCount > 0) {
                 badge.text(alarmCount).show();
             } else {
                 badge.hide();
+                // 알람이 없을 때 메시지 표시
+                if (alarmCount === 0) {
+                    $('#alarmsContainer').html(`
+                        <div class="text-center py-3">
+                            <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                            <div class="text-success fw-bold">@GetLocalizedString("NoActiveAlarms")</div>
+                            <small class="text-muted">@GetLocalizedString("AllSystemsNormal")</small>
+                        </div>
+                    `);
+                }
             }
         }
 
@@ -374,9 +498,30 @@
             location.reload();
         }
 
+        function showNotification(message, type) {
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 1050;" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            $('body').append(alertHtml);
+            
+            setTimeout(() => {
+                $('.alert.position-fixed').fadeOut();
+            }, 3000);
+        }
+
         // 페이지 로드 시 SignalR 연결
         $(document).ready(function() {
             setupSignalR();
+            
+            // 주기적으로 데이터 새로고침 (30초마다)
+            setInterval(function() {
+                // 실제 운영에서는 SignalR로 실시간 업데이트를 받지만,
+                // 백업으로 주기적 새로고침도 설정
+                console.log('Auto refresh check...');
+            }, 30000);
         });
 
         // 페이지 떠날 때 그룹에서 나가기

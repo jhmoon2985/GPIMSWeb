@@ -33,6 +33,7 @@ builder.Services.AddSignalR();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEquipmentService, EquipmentService>();
 builder.Services.AddSingleton<IRealtimeDataService, RealtimeDataService>();
+builder.Services.AddScoped<IDataSeederService, DataSeederService>(); // 새로 추가
 
 // Localization
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
@@ -80,5 +81,21 @@ app.MapControllerRoute(
     pattern: "{controller=Account}/{action=Login}/{id?}");
 
 app.MapHub<RealtimeDataHub>("/realtimeDataHub");
+
+// 애플리케이션 시작 시 데이터 동기화 (개발 환경에서만)
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var seederService = scope.ServiceProvider.GetRequiredService<IDataSeederService>();
+    try
+    {
+        await seederService.SeedChannelDataAsync();
+        Console.WriteLine("✅ Channel data synchronized on startup");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"❌ Error synchronizing channel data on startup: {ex.Message}");
+    }
+}
 
 app.Run();

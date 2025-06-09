@@ -420,6 +420,130 @@
     <script>
         const equipmentId = @Model.Id;
         let connection;
+        // 배치 업데이트 처리를 위한 최적화된 스크립트
+let updateBuffer = new Map();
+let bufferTimeout;
+
+// 배치 업데이트 핸들러
+connection.on("UpdateChannelDataBatch", function (equipmentId, channelUpdates) {
+    if (equipmentId !== @Model.Id) return;
+    
+    // DOM 업데이트를 배치로 처리
+    const fragment = document.createDocumentFragment();
+    const updates = [];
+    
+    channelUpdates.forEach(update => {
+        const row = document.querySelector(`tr[data-channel="${update.ChannelNumber}"]`);
+        if (row) {
+            // 가상 DOM 업데이트 준비
+            updates.push({
+                row: row,
+                data: {
+                    voltage: update.Voltage,
+                    current: update.Current,
+                    capacity: update.Capacity,
+                    power: update.Power,
+                    energy: update.Energy,
+                    status: update.Status,
+                    mode: update.Mode,
+                    scheduleName: update.ScheduleName
+                }
+            });
+        }
+    });
+    
+    // 한 번에 DOM 업데이트 (리플로우 최소화)
+    requestAnimationFrame(() => {
+        updates.forEach(update => {
+            updateChannelRowOptimized(update.row, update.data);
+        });
+    });
+});
+
+// 최적화된 행 업데이트 함수
+function updateChannelRowOptimized(row, data) {
+    // 숫자 값들 업데이트 (텍스트 변경만)
+    row.querySelector('.voltage').textContent = data.voltage.toFixed(2);
+    row.querySelector('.current').textContent = data.current.toFixed(2);
+    row.querySelector('.capacity').textContent = data.capacity.toFixed(1);
+    row.querySelector('.power').textContent = data.power.toFixed(2);
+    row.querySelector('.energy').textContent = data.energy.toFixed(1);
+    
+    // 상태 배지 업데이트 (필요한 경우만)
+    const statusBadge = row.querySelector('.badge');
+    const statusClass = getStatusClass(data.status);
+    const statusText = getStatusText(data.status);
+    
+    if (!statusBadge.classList.contains(statusClass)) {
+        statusBadge.className = `badge ${statusClass}`;
+        statusBadge.textContent = statusText;
+    }
+    
+    // 모드 업데이트
+    const modeCell = row.querySelector('td:nth-child(3)');
+    const modeText = getModeText(data.mode);
+    if (modeCell.textContent !== modeText) {
+        modeCell.textContent = modeText;
+    }
+    
+    // 스케줄 이름 업데이트
+    const scheduleCell = row.querySelector('td:last-child');
+    const scheduleText = data.scheduleName || '-';
+    if (scheduleCell.textContent !== scheduleText) {
+        scheduleCell.textContent = scheduleText;
+    }
+}
+
+// 캐시된 상태/모드 변환 함수들
+const statusClassMap = {
+    0: 'bg-secondary', // Idle
+    1: 'bg-success',   // Active
+    2: 'bg-danger',    // Error
+    3: 'bg-warning'    // Pause
+};
+
+const statusTextMap = {
+    0: 'Idle',
+    1: 'Active', 
+    2: 'Error',
+    3: 'Pause'
+};
+
+const modeTextMap = {
+    0: 'Rest',
+    1: 'Charge',
+    2: 'Discharge', 
+    3: 'CV',
+    4: 'CC'
+};
+
+function getStatusClass(status) {
+    return statusClassMap[status] || 'bg-secondary';
+}
+
+function getStatusText(status) {
+    return statusTextMap[status] || 'Unknown';
+}
+
+function getModeText(mode) {
+    return modeTextMap[mode] || 'Unknown';
+}
+
+// 성능 모니터링
+let performanceStats = {
+    updatesPerSecond: 0,
+    lastSecond: Date.now(),
+    updateCount: 0
+};
+
+setInterval(() => {
+    const now = Date.now();
+    if (now - performanceStats.lastSecond >= 1000) {
+        console.log(`Channel updates per second: ${performanceStats.updateCount}`);
+        performanceStats.updateCount = 0;
+        performanceStats.lastSecond = now;
+    }
+}, 1000);
 
         // SignalR 연결 설정
         function setupSignalR() {

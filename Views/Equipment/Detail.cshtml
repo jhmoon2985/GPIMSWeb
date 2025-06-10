@@ -67,10 +67,10 @@
 <div class="row mb-4">
     <!-- Channels Table (75% width) -->
     <div class="col-lg-9 mb-4">
-        <div class="card" style="height: 450px;"> <!-- 카드 높이 조정 -->
+        <div class="card" style="height: 450px;">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="fas fa-list"></i> @GetLocalizedString("Channels")</h5>
-                <div class="btn-group btn-group-sm justify-content-between align-items-center" role="group">
+                <div class="btn-group btn-group-sm" role="group">
                     <button type="button" class="btn btn-outline-primary" onclick="selectAllChannels()">
                         <i class="fas fa-check-square"></i> Select All
                     </button>
@@ -83,7 +83,7 @@
                 </div>
             </div>
             <div class="card-body p-0">
-                <div class="table-container" style="height: 320px; overflow-y: auto;"> <!-- 내부 테이블 컨테이너 높이 조정 -->
+                <div class="table-container" style="height: 320px; overflow-y: auto;">
                     <table class="table table-striped mb-0" id="channelsTable">
                         <thead class="table-dark sticky-top">
                             <tr>
@@ -153,7 +153,7 @@
 
     <!-- Real-time Chart (25% width) -->
     <div class="col-lg-3 mb-4">
-        <div class="card" style="height: 450px;"> <!-- 채널 카드와 동일한 높이 -->
+        <div class="card" style="height: 450px;">
             <div class="card-header">
                 <h5 class="mb-0"><i class="fas fa-chart-line"></i> @GetLocalizedString("RealTimeChart")</h5>
             </div>
@@ -176,11 +176,11 @@
 <div class="row">
     <!-- CAN/LIN Data -->
     <div class="col-lg-4 mb-4">
-        <div class="card" style="height: 350px;"> <!-- 하단 카드들 동일 높이 -->
+        <div class="card" style="height: 350px;">
             <div class="card-header">
                 <h5 class="mb-0"><i class="fas fa-network-wired"></i> CAN/LIN Data <span id="canLinChannelInfo" class="text-muted small"></span></h5>
             </div>
-            <div class="card-body" style="height: 302px; overflow-y: auto;"> <!-- 스크롤 가능한 본문 -->
+            <div class="card-body" style="height: 302px; overflow-y: auto;">
                 <div id="canLinDataContent">
                     @if (Model.CanLinData.Any())
                     {
@@ -222,11 +222,11 @@
 
     <!-- AUX Sensors -->
     <div class="col-lg-4 mb-4">
-        <div class="card" style="height: 350px;"> <!-- 하단 카드들 동일 높이 -->
+        <div class="card" style="height: 350px;">
             <div class="card-header">
                 <h5 class="mb-0"><i class="fas fa-thermometer-half"></i> @GetLocalizedString("AuxSensors") <span id="auxChannelInfo" class="text-muted small"></span></h5>
             </div>
-            <div class="card-body" style="height: 302px; overflow-y: auto;"> <!-- 스크롤 가능한 본문 -->
+            <div class="card-body" style="height: 302px; overflow-y: auto;">
                 <div id="auxDataContent">
                     @if (Model.AuxData.Any())
                     {
@@ -262,7 +262,7 @@
 
     <!-- Alarms -->
     <div class="col-lg-4 mb-4">
-        <div class="card" style="height: 350px;"> <!-- 하단 카드들 동일 높이 -->
+        <div class="card" style="height: 350px;">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
                     <i class="fas fa-exclamation-triangle"></i> @GetLocalizedString("Alarms")
@@ -272,7 +272,7 @@
                     <span class="badge bg-danger">@Model.Alarms.Count</span>
                 }
             </div>
-            <div class="card-body" style="height: 302px; overflow-y: auto;"> <!-- 스크롤 가능한 본문 -->
+            <div class="card-body" style="height: 302px; overflow-y: auto;">
                 <div id="alarmsContainer">
                     @foreach (var alarm in Model.Alarms)
                     {
@@ -405,145 +405,16 @@
         font-size: 0.75rem;
         padding: 0.35rem 0.65rem;
     }
-    
-    .channel-row {
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-    
-    .channel-row:hover {
-        background-color: rgba(0,123,255,0.05) !important;
-    }
 </style>
 
 @section Scripts {
     <script>
         const equipmentId = @Model.Id;
         let connection;
+        
         // 배치 업데이트 처리를 위한 최적화된 스크립트
-let updateBuffer = new Map();
-let bufferTimeout;
-
-// 배치 업데이트 핸들러
-connection.on("UpdateChannelDataBatch", function (equipmentId, channelUpdates) {
-    if (equipmentId !== @Model.Id) return;
-    
-    // DOM 업데이트를 배치로 처리
-    const fragment = document.createDocumentFragment();
-    const updates = [];
-    
-    channelUpdates.forEach(update => {
-        const row = document.querySelector(`tr[data-channel="${update.ChannelNumber}"]`);
-        if (row) {
-            // 가상 DOM 업데이트 준비
-            updates.push({
-                row: row,
-                data: {
-                    voltage: update.Voltage,
-                    current: update.Current,
-                    capacity: update.Capacity,
-                    power: update.Power,
-                    energy: update.Energy,
-                    status: update.Status,
-                    mode: update.Mode,
-                    scheduleName: update.ScheduleName
-                }
-            });
-        }
-    });
-    
-    // 한 번에 DOM 업데이트 (리플로우 최소화)
-    requestAnimationFrame(() => {
-        updates.forEach(update => {
-            updateChannelRowOptimized(update.row, update.data);
-        });
-    });
-});
-
-// 최적화된 행 업데이트 함수
-function updateChannelRowOptimized(row, data) {
-    // 숫자 값들 업데이트 (텍스트 변경만)
-    row.querySelector('.voltage').textContent = data.voltage.toFixed(2);
-    row.querySelector('.current').textContent = data.current.toFixed(2);
-    row.querySelector('.capacity').textContent = data.capacity.toFixed(1);
-    row.querySelector('.power').textContent = data.power.toFixed(2);
-    row.querySelector('.energy').textContent = data.energy.toFixed(1);
-    
-    // 상태 배지 업데이트 (필요한 경우만)
-    const statusBadge = row.querySelector('.badge');
-    const statusClass = getStatusClass(data.status);
-    const statusText = getStatusText(data.status);
-    
-    if (!statusBadge.classList.contains(statusClass)) {
-        statusBadge.className = `badge ${statusClass}`;
-        statusBadge.textContent = statusText;
-    }
-    
-    // 모드 업데이트
-    const modeCell = row.querySelector('td:nth-child(3)');
-    const modeText = getModeText(data.mode);
-    if (modeCell.textContent !== modeText) {
-        modeCell.textContent = modeText;
-    }
-    
-    // 스케줄 이름 업데이트
-    const scheduleCell = row.querySelector('td:last-child');
-    const scheduleText = data.scheduleName || '-';
-    if (scheduleCell.textContent !== scheduleText) {
-        scheduleCell.textContent = scheduleText;
-    }
-}
-
-// 캐시된 상태/모드 변환 함수들
-const statusClassMap = {
-    0: 'bg-secondary', // Idle
-    1: 'bg-success',   // Active
-    2: 'bg-danger',    // Error
-    3: 'bg-warning'    // Pause
-};
-
-const statusTextMap = {
-    0: 'Idle',
-    1: 'Active', 
-    2: 'Error',
-    3: 'Pause'
-};
-
-const modeTextMap = {
-    0: 'Rest',
-    1: 'Charge',
-    2: 'Discharge', 
-    3: 'CV',
-    4: 'CC'
-};
-
-function getStatusClass(status) {
-    return statusClassMap[status] || 'bg-secondary';
-}
-
-function getStatusText(status) {
-    return statusTextMap[status] || 'Unknown';
-}
-
-function getModeText(mode) {
-    return modeTextMap[mode] || 'Unknown';
-}
-
-// 성능 모니터링
-let performanceStats = {
-    updatesPerSecond: 0,
-    lastSecond: Date.now(),
-    updateCount: 0
-};
-
-setInterval(() => {
-    const now = Date.now();
-    if (now - performanceStats.lastSecond >= 1000) {
-        console.log(`Channel updates per second: ${performanceStats.updateCount}`);
-        performanceStats.updateCount = 0;
-        performanceStats.lastSecond = now;
-    }
-}, 1000);
+        let updateBuffer = new Map();
+        let bufferTimeout;
 
         // SignalR 연결 설정
         function setupSignalR() {
@@ -564,6 +435,40 @@ setInterval(() => {
                 if (updateEquipmentId === equipmentId) {
                     updateChannelRow(channelNumber, channelData);
                 }
+            });
+
+            // 배치 업데이트 핸들러
+            connection.on("UpdateChannelDataBatch", function (equipmentId, channelUpdates) {
+                if (equipmentId !== @Model.Id) return;
+                
+                // DOM 업데이트를 배치로 처리
+                const updates = [];
+                
+                channelUpdates.forEach(update => {
+                    const row = document.querySelector(`tr[data-channel="${update.ChannelNumber}"]`);
+                    if (row) {
+                        updates.push({
+                            row: row,
+                            data: {
+                                voltage: update.Voltage,
+                                current: update.Current,
+                                capacity: update.Capacity,
+                                power: update.Power,
+                                energy: update.Energy,
+                                status: update.Status,
+                                mode: update.Mode,
+                                scheduleName: update.ScheduleName
+                            }
+                        });
+                    }
+                });
+                
+                // 한 번에 DOM 업데이트 (리플로우 최소화)
+                requestAnimationFrame(() => {
+                    updates.forEach(update => {
+                        updateChannelRowOptimized(update.row, update.data);
+                    });
+                });
             });
 
             // CAN/LIN 데이터 업데이트 (장비별)
@@ -597,6 +502,40 @@ setInterval(() => {
                     setupSignalR();
                 }, 5000);
             });
+        }
+
+        // 최적화된 행 업데이트 함수
+        function updateChannelRowOptimized(row, data) {
+            // 숫자 값들 업데이트 (텍스트 변경만)
+            row.querySelector('.voltage').textContent = data.voltage.toFixed(2);
+            row.querySelector('.current').textContent = data.current.toFixed(2);
+            row.querySelector('.capacity').textContent = data.capacity.toFixed(1);
+            row.querySelector('.power').textContent = data.power.toFixed(2);
+            row.querySelector('.energy').textContent = data.energy.toFixed(1);
+            
+            // 상태 배지 업데이트 (필요한 경우만)
+            const statusBadge = row.querySelector('.badge');
+            const statusClass = getStatusClass(data.status);
+            const statusText = getStatusText(data.status);
+            
+            if (!statusBadge.classList.contains(statusClass)) {
+                statusBadge.className = `badge ${statusClass}`;
+                statusBadge.textContent = statusText;
+            }
+            
+            // 모드 업데이트
+            const modeCell = row.querySelector('td:nth-child(3)');
+            const modeText = getModeText(data.mode);
+            if (modeCell.textContent !== modeText) {
+                modeCell.textContent = modeText;
+            }
+            
+            // 스케줄 이름 업데이트
+            const scheduleCell = row.querySelector('td:last-child');
+            const scheduleText = data.scheduleName || '-';
+            if (scheduleCell.textContent !== scheduleText) {
+                scheduleCell.textContent = scheduleText;
+            }
         }
 
         function updateChannelRow(channelNumber, data) {
@@ -641,7 +580,7 @@ setInterval(() => {
                 statusBadge.addClass(statusClass).text(statusText);
                 
                 // 모드 업데이트
-                const modeCell = row.find('td:nth-child(3)'); // Mode column
+                const modeCell = row.find('td:nth-child(3)');
                 let modeText = '';
                 switch (data.mode) {
                     case 0: modeText = '@GetLocalizedString("Rest")'; break;
@@ -657,12 +596,6 @@ setInterval(() => {
                 const scheduleCell = row.find('td:last-child');
                 scheduleCell.text(data.scheduleName || '-');
                 
-                // 시각적 피드백 - 업데이트된 행 강조
-                row.addClass('table-info');
-                setTimeout(() => {
-                    row.removeClass('table-info');
-                }, 1000);
-                
                 // 애니메이션 효과
                 row.css('background-color', '#d4edda');
                 setTimeout(() => {
@@ -673,8 +606,42 @@ setInterval(() => {
             }
         }
 
+        // 캐시된 상태/모드 변환 함수들
+        const statusClassMap = {
+            0: 'bg-secondary', // Idle
+            1: 'bg-success',   // Active
+            2: 'bg-danger',    // Error
+            3: 'bg-warning'    // Pause
+        };
+
+        const statusTextMap = {
+            0: 'Idle',
+            1: 'Active', 
+            2: 'Error',
+            3: 'Pause'
+        };
+
+        const modeTextMap = {
+            0: 'Rest',
+            1: 'Charge',
+            2: 'Discharge', 
+            3: 'CV',
+            4: 'CC'
+        };
+
+        function getStatusClass(status) {
+            return statusClassMap[status] || 'bg-secondary';
+        }
+
+        function getStatusText(status) {
+            return statusTextMap[status] || 'Unknown';
+        }
+
+        function getModeText(mode) {
+            return modeTextMap[mode] || 'Unknown';
+        }
+
         function updateCanLinRow(name, data) {
-            // CAN/LIN 데이터를 이름으로 찾아서 업데이트
             const row = $(`#canlinTableBody tr`).filter(function() {
                 return $(this).find('td:first').text().trim() === name;
             });
@@ -692,7 +659,6 @@ setInterval(() => {
                 
                 console.log(`CAN/LIN ${name} updated:`, data);
             } else {
-                // 새로운 CAN/LIN 데이터가 추가된 경우
                 addNewCanLinRow(name, data);
             }
         }
@@ -708,7 +674,6 @@ setInterval(() => {
             `;
             
             if ($('#canlinTableBody').length === 0) {
-                // 테이블이 없으면 생성
                 const tableHtml = `
                     <div class="table-responsive">
                         <table class="table table-sm">
@@ -910,7 +875,7 @@ setInterval(() => {
             }
         }
 
-        // 기존 채널 선택 관련 함수들...
+        // 채널 선택 관련 함수들
         let selectedChannels = [];
         let lastSelectedChannel = null;
 
@@ -1271,6 +1236,26 @@ setInterval(() => {
                     }
                 }
             }, 30000);
+            
+            // 키보드 단축키 추가
+            $(document).keydown(function(e) {
+                // Ctrl+A: 모든 채널 선택
+                if (e.ctrlKey && e.key === 'a') {
+                    e.preventDefault();
+                    selectAllChannels();
+                }
+                
+                // ESC: 선택 해제
+                if (e.key === 'Escape') {
+                    clearChannelSelection();
+                }
+                
+                // F5: 데이터 새로고침
+                if (e.key === 'F5') {
+                    e.preventDefault();
+                    refreshData();
+                }
+            });
         });
 
         // 페이지 떠날 때 그룹에서 나가기
